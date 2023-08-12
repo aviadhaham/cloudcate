@@ -3,14 +3,13 @@ package main
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go/aws"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
@@ -62,6 +61,30 @@ func getRegions() ([]string, error) {
 	return regionsList, err
 }
 
+func findLoadBalancer(config aws.Config, region string, searchValue string) ([]string, error) {
+	config.Region = region
+
+	elbv2Client := elasticloadbalancingv2.NewFromConfig(config)
+	input := &elasticloadbalancingv2.DescribeLoadBalancersInput{}
+	output, err := elbv2Client.DescribeLoadBalancers(context.TODO(), input)
+	if err != nil && output == nil {
+		if strings.Contains(err.Error(), "InvalidClientTokenId") || strings.Contains(err.Error(), "no identity-based policy allows the elasticloadbalancing:DescribeLoadBalancers action") {
+			return nil, err
+		}
+		fmt.Println("error describing load balancers", err)
+	}
+
+	loadBalancers := output.LoadBalancers
+	for _, lb := range loadBalancers {
+		if strings.Contains(*lb.LoadBalancerArn, searchValue) {
+			lbArnSlice := strings.Split(*lb.LoadBalancerArn, ":")
+			return lbArnSlice, nil
+		}
+	}
+
+	return nil, err
+}
+
 func main() {
 	profiles, err := getProfiles()
 	if err != nil {
@@ -73,37 +96,35 @@ func main() {
 		log.Fatalf("Failed to get regions: %v", err)
 	}
 
-	// searchTerm := "git-pages"
+	// resourceSearchFunctions := map[string]interface{}{
+	// 	"LB": findLoadBalancer,
+	// }
+
+	searchResourceStr := "common-svc-np-nginx-v1"
+	searchServiceType := "loadbalancer"
+	var lbArnSlice []string
 
 	for _, profile := range profiles {
 		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
 		if err != nil {
 			log.Fatalf("failed to load configuration for profile, %v", err)
 		}
-
 		for _, region := range regions {
 
-			cfg.Region = region
-
-			elbv2Client := elasticloadbalancingv2.NewFromConfig(cfg)
-			input := &elasticloadbalancingv2.DescribeLoadBalancersInput{}
-			output, err := elbv2Client.DescribeLoadBalancers(context.TODO(), input)
-			if err != nil {
-				fmt.Println(err)
+			switch searchServiceType {
+			case "loadbalancer":
+				lbArnSlice, err = findLoadBalancer(cfg, region, searchResourceStr)
+				if lbArnSlice == nil {
+					fmt.Errorf("no load balancer was found: %s", searchResourceStr)
+				}
+				if err != nil {
+					fmt.Errorf("%s", err)
+				}
+				if lbArnSlice != nil {
+					fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
+					os.Exit(0)
+				}
 			}
-
-			jsonData, err := json.Marshal(output)
-			if err != nil {
-				fmt.Println("Error: ", err)
-			}
-			jsonString := string(jsonData)
-
-			// for _, lb :=
-
-			fmt.Printf("Profile: %s, Region: %s\n", profile, region)
-			fmt.Println(jsonString, "\n******split*****\n")
 		}
 	}
-
-	// fetch the aws account from the LoadBalancerArn field returned in each loadbalancer
 }
