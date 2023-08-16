@@ -94,21 +94,27 @@ func findResource(profile string, regionList []string, resourceType string, reso
 		log.Fatalf("failed to load configuration for profile, %v", err)
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(len(regionList))
+
 	for _, region := range regionList {
 		switch resourceType {
 		case "loadbalancer":
-			lbArnSlice, err = findLoadBalancer(cfg, region, resourceName)
-			// if lbArnSlice == nil {
-			// 	fmt.Printf("no load balancer was found: %s", resourceName)
-			// }
-			// if err != nil {
-			// 	fmt.Printf("%s", err)
-			// }
-			if lbArnSlice != nil {
-				fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
-			}
+			go func(region string) {
+				lbArnSlice, err = findLoadBalancer(cfg, region, resourceName)
+				// if lbArnSlice == nil {
+				// 	fmt.Printf("no load balancer was found: %s", resourceName)
+				// }
+				// if err != nil {
+				// 	fmt.Printf("%s", err)
+				// }
+				if lbArnSlice != nil {
+					fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
+				}
+			}(region)
 		}
 	}
+	wg.Wait()
 }
 
 func main() {
