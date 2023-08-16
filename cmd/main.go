@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -71,7 +72,7 @@ func findLoadBalancer(config aws.Config, region string, searchValue string) ([]s
 		if strings.Contains(err.Error(), "InvalidClientTokenId") || strings.Contains(err.Error(), "no identity-based policy allows the elasticloadbalancing:DescribeLoadBalancers action") {
 			return nil, err
 		}
-		fmt.Println("error describing load balancers", err)
+		// fmt.Println("error describing load balancers", err)
 	}
 
 	loadBalancers := output.LoadBalancers
@@ -83,6 +84,31 @@ func findLoadBalancer(config aws.Config, region string, searchValue string) ([]s
 	}
 
 	return nil, err
+}
+
+func findResource(profile string, regionList []string, resourceType string, resourceName string) {
+	var lbArnSlice []string
+
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
+	if err != nil {
+		log.Fatalf("failed to load configuration for profile, %v", err)
+	}
+
+	for _, region := range regionList {
+		switch resourceType {
+		case "loadbalancer":
+			lbArnSlice, err = findLoadBalancer(cfg, region, resourceName)
+			// if lbArnSlice == nil {
+			// 	fmt.Printf("no load balancer was found: %s", resourceName)
+			// }
+			// if err != nil {
+			// 	fmt.Printf("%s", err)
+			// }
+			if lbArnSlice != nil {
+				fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
+			}
+		}
+	}
 }
 
 func main() {
@@ -100,31 +126,19 @@ func main() {
 	// 	"LB": findLoadBalancer,
 	// }
 
-	searchResourceStr := "common-svc-np-nginx-v1"
-	searchServiceType := "loadbalancer"
-	var lbArnSlice []string
+	resourceName := "common-svc-np-nginx-v1"
+	resourceType := "loadbalancer"
+
+	var wg sync.WaitGroup
+	wg.Add(len(profiles))
 
 	for _, profile := range profiles {
-		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
-		if err != nil {
-			log.Fatalf("failed to load configuration for profile, %v", err)
-		}
-		for _, region := range regions {
-
-			switch searchServiceType {
-			case "loadbalancer":
-				lbArnSlice, err = findLoadBalancer(cfg, region, searchResourceStr)
-				if lbArnSlice == nil {
-					fmt.Errorf("no load balancer was found: %s", searchResourceStr)
-				}
-				if err != nil {
-					fmt.Errorf("%s", err)
-				}
-				if lbArnSlice != nil {
-					fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
-					os.Exit(0)
-				}
-			}
-		}
+		go func(profile string) {
+			fmt.Println("\nNEW THREAD!****\n")
+			defer wg.Done()
+			findResource(profile, regions, resourceType, resourceName)
+		}(profile)
 	}
+
+	wg.Wait()
 }
