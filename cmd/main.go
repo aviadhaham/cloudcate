@@ -86,35 +86,20 @@ func findLoadBalancer(config aws.Config, region string, searchValue string) ([]s
 	return nil, err
 }
 
-func findResource(profile string, regionList []string, resourceType string, resourceName string) {
-	var lbArnSlice []string
-
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
-	if err != nil {
-		log.Fatalf("failed to load configuration for profile, %v", err)
-	}
-
-	var wg sync.WaitGroup
-	wg.Add(len(regionList))
-
-	for _, region := range regionList {
-		switch resourceType {
-		case "loadbalancer":
-			go func(region string) {
-				lbArnSlice, err = findLoadBalancer(cfg, region, resourceName)
-				// if lbArnSlice == nil {
-				// 	fmt.Printf("no load balancer was found: %s", resourceName)
-				// }
-				// if err != nil {
-				// 	fmt.Printf("%s", err)
-				// }
-				if lbArnSlice != nil {
-					fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
-				}
-			}(region)
+func findResourceInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) {
+	switch resourceType {
+	case "loadbalancer":
+		lbArnSlice, _ := findLoadBalancer(cfg, region, resourceName)
+		// if lbArnSlice == nil {
+		// 	fmt.Printf("no load balancer was found: %s", resourceName)
+		// }
+		// if err != nil {
+		// 	fmt.Printf("%s", err)
+		// }
+		if lbArnSlice != nil {
+			fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
 		}
 	}
-	wg.Wait()
 }
 
 func main() {
@@ -136,15 +121,20 @@ func main() {
 	resourceType := "loadbalancer"
 
 	var wg sync.WaitGroup
-	wg.Add(len(profiles))
 
 	for _, profile := range profiles {
-		go func(profile string) {
-			fmt.Println("\nNEW THREAD!****\n")
-			defer wg.Done()
-			findResource(profile, regions, resourceType, resourceName)
-		}(profile)
-	}
+		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
+		if err != nil {
+			log.Fatalf("failed to load configuration for profile, %v", err)
+		}
 
+		for _, region := range regions {
+			wg.Add(1)
+			go func(profile string, cfg aws.Config, region string) {
+				defer wg.Done()
+				findResourceInRegion(profile, cfg, region, resourceType, resourceName)
+			}(profile, cfg, region)
+		}
+	}
 	wg.Wait()
 }
