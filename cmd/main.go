@@ -14,6 +14,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
 func getProfiles() ([]string, error) {
@@ -86,7 +88,39 @@ func findLoadBalancer(config aws.Config, region string, searchValue string) ([]s
 	return nil, err
 }
 
+func getAwsAccount(cfg aws.Config, region string) *string {
+	cfg.Region = region
+
+	stsClient := sts.NewFromConfig(cfg)
+	identity, err := stsClient.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
+	if err != nil {
+		// fmt.Println("Unable to get caller identity:", err)
+		return nil
+	}
+	return identity.Account
+}
+
+func findS3Bucket(config aws.Config, region string, searchValue string) *string {
+	config.Region = region
+
+	s3Client := s3.NewFromConfig(config)
+	output, err := s3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
+	if err != nil {
+		// fmt.Printf("Unable to list buckets, %v", err)
+		return nil
+	}
+
+	for _, bucket := range output.Buckets {
+		if strings.Contains(*bucket.Name, searchValue) {
+			return bucket.Name
+		}
+	}
+	return nil
+}
+
 func findResourceInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) {
+	associatedAwsAccount := getAwsAccount(cfg, region)
+
 	switch resourceType {
 	case "loadbalancer":
 		lbArnSlice, _ := findLoadBalancer(cfg, region, resourceName)
@@ -98,6 +132,11 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 		// }
 		if lbArnSlice != nil {
 			fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
+		}
+	case "s3":
+		bucketName := findS3Bucket(cfg, region, resourceName)
+		if bucketName != nil {
+			fmt.Printf("S3 bucket: %s -> AWS account: %s", *bucketName, *associatedAwsAccount)
 		}
 	}
 }
@@ -117,8 +156,8 @@ func main() {
 	// 	"LB": findLoadBalancer,
 	// }
 
-	resourceName := "common-svc-np-nginx-v1"
-	resourceType := "loadbalancer"
+	resourceName := "amb-aws-config-prod-k8s"
+	resourceType := "s3"
 
 	var wg sync.WaitGroup
 
