@@ -155,9 +155,8 @@ func main() {
 		log.Fatalf("Failed to get regions: %v", err)
 	}
 
-	// resourceSearchFunctions := map[string]interface{}{
-	// 	"LB": findLoadBalancer,
-	// }
+	// resourceName := "ingressk-be1b829dbb"
+	// resourceType := "loadbalancer"
 
 	resourceName := "amb-aws-config-prod-k8s"
 	resourceType := "s3"
