@@ -93,16 +93,16 @@ func findLoadBalancer(config aws.Config, region string, searchValue string, foun
 	return nil, err
 }
 
-func getAwsAccount(cfg aws.Config, region string) *string {
+func getAwsAccount(cfg aws.Config, region string) string {
 	cfg.Region = region
 
 	stsClient := sts.NewFromConfig(cfg)
 	identity, err := stsClient.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
 	if err != nil {
 		// fmt.Println("Unable to get caller identity:", err)
-		return nil
+		return ""
 	}
-	return identity.Account
+	return *identity.Account
 }
 
 func findS3Bucket(config aws.Config, region string, searchValue string, found *int32) string {
@@ -116,7 +116,7 @@ func findS3Bucket(config aws.Config, region string, searchValue string, found *i
 	output, err := s3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
 	if err != nil {
 		// fmt.Printf("Unable to list buckets, %v", err)
-		return nil
+		return ""
 	}
 
 	for _, bucket := range output.Buckets {
@@ -125,7 +125,7 @@ func findS3Bucket(config aws.Config, region string, searchValue string, found *i
 			return *bucket.Name
 		}
 	}
-	return nil
+	return ""
 }
 
 func findResourceInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string, found *int32) {
@@ -146,7 +146,7 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 	case "s3":
 		bucketName := findS3Bucket(cfg, region, resourceName, found)
 		if bucketName != "" {
-			fmt.Printf("S3 bucket: %s -> AWS account: %s", *bucketName, *associatedAwsAccount)
+			fmt.Printf("S3 bucket: %s -> AWS account: %s", bucketName, associatedAwsAccount)
 		}
 	}
 }
