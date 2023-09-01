@@ -78,7 +78,6 @@ func findLoadBalancer(config aws.Config, region string, searchValue string, foun
 		if strings.Contains(err.Error(), "InvalidClientTokenId") || strings.Contains(err.Error(), "no identity-based policy allows the elasticloadbalancing:DescribeLoadBalancers action") {
 			return nil, err
 		}
-		// fmt.Println("error describing load balancers", err)
 	}
 
 	loadBalancers := output.LoadBalancers
@@ -134,12 +133,6 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 	switch resourceType {
 	case "loadbalancer":
 		lbArnSlice, _ := findLoadBalancer(cfg, region, resourceName, found)
-		// if lbArnSlice == nil {
-		// 	fmt.Printf("no load balancer was found: %s", resourceName)
-		// }
-		// if err != nil {
-		// 	fmt.Printf("%s", err)
-		// }
 		if lbArnSlice != nil {
 			fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
 		}
