@@ -65,6 +65,18 @@ func getRegions() ([]string, error) {
 	return regionsList, err
 }
 
+func getAwsAccount(cfg aws.Config, region string) string {
+	cfg.Region = region
+
+	stsClient := sts.NewFromConfig(cfg)
+	identity, err := stsClient.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
+	if err != nil {
+		// fmt.Println("Unable to get caller identity:", err)
+		return ""
+	}
+	return *identity.Account
+}
+
 func findLoadBalancer(config aws.Config, region string, searchValue string, found *int32) ([]string, error) {
 	if atomic.LoadInt32(found) == 1 {
 		return nil, nil
@@ -90,18 +102,6 @@ func findLoadBalancer(config aws.Config, region string, searchValue string, foun
 	}
 
 	return nil, err
-}
-
-func getAwsAccount(cfg aws.Config, region string) string {
-	cfg.Region = region
-
-	stsClient := sts.NewFromConfig(cfg)
-	identity, err := stsClient.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
-	if err != nil {
-		// fmt.Println("Unable to get caller identity:", err)
-		return ""
-	}
-	return *identity.Account
 }
 
 func findS3Bucket(config aws.Config, region string, searchValue string, found *int32) string {
