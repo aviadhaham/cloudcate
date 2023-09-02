@@ -90,18 +90,21 @@ func findLoadBalancer(config aws.Config, region string, searchValue string) ([]s
 	elbv2Client := elasticloadbalancingv2.NewFromConfig(config)
 	input := &elasticloadbalancingv2.DescribeLoadBalancersInput{}
 	output, err := elbv2Client.DescribeLoadBalancers(context.TODO(), input)
-	if err != nil && output == nil {
-		if strings.Contains(err.Error(), "InvalidClientTokenId") || strings.Contains(err.Error(), "no identity-based policy allows the elasticloadbalancing:DescribeLoadBalancers action") {
-			return nil, err
+	if err != nil {
+		var accessDeniedErr *awshttp.ResponseError
+		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
+			return nil, nil
 		}
+		fmt.Printf("Unable to list load balancers, %v", err)
 	}
 
-	loadBalancers := output.LoadBalancers
-	for _, lb := range loadBalancers {
-		if strings.Contains(*lb.LoadBalancerArn, searchValue) {
-			atomic.StoreInt32(found, 1)
-			lbArnSlice := strings.Split(*lb.LoadBalancerArn, ":")
-			return lbArnSlice, nil
+	if output != nil {
+		loadBalancers := output.LoadBalancers
+		for _, lb := range loadBalancers {
+			if strings.Contains(*lb.LoadBalancerArn, searchValue) {
+				lbArnSlice := strings.Split(*lb.LoadBalancerArn, ":")
+				return lbArnSlice, nil
+			}
 		}
 	}
 
@@ -137,12 +140,12 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 	case "loadbalancer":
 		lbArnSlice, _ := findLoadBalancer(cfg, region, resourceName)
 		if lbArnSlice != nil {
-			fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
+			fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s\n", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
 		}
 	case "s3":
 		bucketName := findS3Bucket(cfg, region, resourceName)
 		if bucketName != "" {
-			fmt.Printf("S3 bucket: %s -> AWS account: %s", bucketName, associatedAwsAccount)
+			fmt.Printf("S3 bucket: %s -> AWS account: %s\n", bucketName, associatedAwsAccount)
 		}
 	}
 }
@@ -152,7 +155,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to get profiles: %v", err)
 	}
-
 	regions, err := getRegions()
 	if err != nil {
 		log.Fatalf("Failed to get regions: %v", err)
