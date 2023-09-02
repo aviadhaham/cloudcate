@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
@@ -49,7 +50,12 @@ func getRegions() ([]string, error) {
 	client := ec2.NewFromConfig(cfg)
 
 	input := &ec2.DescribeRegionsInput{
-		AllRegions: aws.Bool(true),
+		Filters: []types.Filter{
+			{
+				Name:   aws.String("opt-in-status"),
+				Values: []string{"opt-in-not-required", "opted-in"},
+			},
+		},
 	}
 
 	resp, err := client.DescribeRegions(context.TODO(), input)
@@ -71,7 +77,7 @@ func getAwsAccount(cfg aws.Config, region string) string {
 	stsClient := sts.NewFromConfig(cfg)
 	identity, err := stsClient.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
 	if err != nil {
-		// fmt.Println("Unable to get caller identity:", err)
+		fmt.Println("Unable to get caller identity:", err)
 		return ""
 	}
 	return *identity.Account
