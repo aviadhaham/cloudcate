@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
@@ -120,7 +122,11 @@ func findS3Bucket(config aws.Config, region string, searchValue string, found *i
 	s3Client := s3.NewFromConfig(config)
 	output, err := s3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
 	if err != nil {
-		// fmt.Printf("Unable to list buckets, %v", err)
+		var accessDeniedErr *awshttp.ResponseError
+		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
+			return ""
+		}
+		fmt.Printf("Unable to list buckets, %v", err)
 		return ""
 	}
 
