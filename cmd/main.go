@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"sync/atomic"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -85,10 +84,7 @@ func getAwsAccount(cfg aws.Config, region string) string {
 	return *identity.Account
 }
 
-func findLoadBalancer(config aws.Config, region string, searchValue string, found *int32) ([]string, error) {
-	if atomic.LoadInt32(found) == 1 {
-		return nil, nil
-	}
+func findLoadBalancer(config aws.Config, region string, searchValue string) ([]string, error) {
 	config.Region = region
 
 	elbv2Client := elasticloadbalancingv2.NewFromConfig(config)
@@ -112,11 +108,7 @@ func findLoadBalancer(config aws.Config, region string, searchValue string, foun
 	return nil, err
 }
 
-func findS3Bucket(config aws.Config, region string, searchValue string, found *int32) string {
-	if atomic.LoadInt32(found) == 1 {
-		return ""
-	}
-
+func findS3Bucket(config aws.Config, region string, searchValue string) string {
 	config.Region = region
 
 	s3Client := s3.NewFromConfig(config)
@@ -132,24 +124,23 @@ func findS3Bucket(config aws.Config, region string, searchValue string, found *i
 
 	for _, bucket := range output.Buckets {
 		if strings.Contains(*bucket.Name, searchValue) {
-			atomic.StoreInt32(found, 1)
 			return *bucket.Name
 		}
 	}
 	return ""
 }
 
-func findResourceInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string, found *int32) {
+func findResourceInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) {
 	associatedAwsAccount := getAwsAccount(cfg, region)
 
 	switch resourceType {
 	case "loadbalancer":
-		lbArnSlice, _ := findLoadBalancer(cfg, region, resourceName, found)
+		lbArnSlice, _ := findLoadBalancer(cfg, region, resourceName)
 		if lbArnSlice != nil {
 			fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
 		}
 	case "s3":
-		bucketName := findS3Bucket(cfg, region, resourceName, found)
+		bucketName := findS3Bucket(cfg, region, resourceName)
 		if bucketName != "" {
 			fmt.Printf("S3 bucket: %s -> AWS account: %s", bucketName, associatedAwsAccount)
 		}
@@ -167,14 +158,18 @@ func main() {
 		log.Fatalf("Failed to get regions: %v", err)
 	}
 
-	// resourceName := "ingressk-be1b829dbb"
-	// resourceType := "loadbalancer"
+	resourceGlobality := map[string]bool{
+		"loadbalancer": false,
+		"s3":           true,
+	}
 
-	resourceName := "amb-aws-config-prod-k8s"
-	resourceType := "s3"
+	resourceName := "ingressk-be1b829dbb"
+	resourceType := "loadbalancer"
+
+	// resourceName := "amb-aws-config-prod-k8s"
+	// resourceType := "s3"
 
 	var wg sync.WaitGroup
-	var found int32
 
 	for _, profile := range profiles {
 		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
@@ -182,11 +177,20 @@ func main() {
 			log.Fatalf("failed to load configuration for profile, %v", err)
 		}
 
+		if resourceGlobality[resourceType] {
+			wg.Add(1)
+			go func(profile string, cfg aws.Config, region string) {
+				defer wg.Done()
+				findResourceInRegion(profile, cfg, region, resourceType, resourceName)
+			}(profile, cfg, regions[0])
+			continue
+		}
+
 		for _, region := range regions {
 			wg.Add(1)
 			go func(profile string, cfg aws.Config, region string) {
 				defer wg.Done()
-				findResourceInRegion(profile, cfg, region, resourceType, resourceName, &found)
+				findResourceInRegion(profile, cfg, region, resourceType, resourceName)
 			}(profile, cfg, region)
 		}
 	}
