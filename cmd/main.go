@@ -44,12 +44,15 @@ func getProfiles() ([]string, error) {
 	return profileList, err
 }
 
-func getRegions() ([]string, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
-	if err != nil {
-		log.Fatalf("unable to load SDK config, %v", err)
-	}
+func getRegions(profile string) ([]string, error) {
 
+	// use .aws/credentials file to get profiles, but use only the first one in the file
+	// hardcoded region to us-east-1, because there's no chance it's not going to be active
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
+	if err != nil {
+		log.Fatalf("failed to load configuration for profile, %v", err)
+	}
+	cfg.Region = "us-east-1"
 	client := ec2.NewFromConfig(cfg)
 
 	input := &ec2.DescribeRegionsInput{
@@ -64,6 +67,7 @@ func getRegions() ([]string, error) {
 	resp, err := client.DescribeRegions(context.TODO(), input)
 	if err != nil {
 		log.Fatalf("failed to describe regions, %v", err)
+		return nil, err
 	}
 
 	regionsList := []string{}
@@ -210,8 +214,10 @@ func main() {
 		log.Fatalf("Failed to get profiles: %v", err)
 	}
 
-	// regions := []string{"us-east-2, us-east-1, us-west-1, us-west-2, af-south-1, ap-east-1, ap-south-2, ap-southeast-3, ap-southeast-4, ap-south-1, ap-northeast-3, ap-northeast-2, ap-southeast-1, ap-southeast-2, ap-northeast-1, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-south-1, eu-west-3, eu-south-2, eu-north-1, eu-central-2, il-central-1, me-south-1, me-central-1, sa-east-1"}
-	regions := []string{"us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-2", "ap-southeast-3", "ap-southeast-4", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-south-2", "eu-north-1", "eu-central-2", "il-central-1", "me-south-1", "me-central-1", "sa-east-1"}
+	regions, err := getRegions(profiles[0])
+	if err != nil {
+		log.Fatalf("Failed to get regions: %v", err)
+	}
 
 	resourceGlobality := map[string]bool{
 		"loadbalancer": false,
