@@ -115,7 +115,7 @@ func findLoadBalancer(config aws.Config, region string, searchValue string) ([]s
 	return filteredLoadBalancers, nil
 }
 
-func findS3Bucket(config aws.Config, region string, searchValue string) string {
+func findS3Bucket(config aws.Config, region string, searchValue string) []string {
 	config.Region = region
 
 	s3Client := s3.NewFromConfig(config)
@@ -123,18 +123,21 @@ func findS3Bucket(config aws.Config, region string, searchValue string) string {
 	if err != nil {
 		var accessDeniedErr *awshttp.ResponseError
 		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
-			return ""
+			return nil
 		}
 		fmt.Printf("Unable to list buckets, %v", err)
-		return ""
+		return nil
 	}
 
+	filteredS3Buckets := []string{}
+	if output != nil {
 	for _, bucket := range output.Buckets {
 		if strings.Contains(*bucket.Name, searchValue) {
-			return *bucket.Name
+				filteredS3Buckets = append(filteredS3Buckets, *bucket.Name)
+			}
 		}
 	}
-	return ""
+	return filteredS3Buckets
 }
 
 func findDns(config aws.Config, region string, searchValue string) map[string][]types.ResourceRecordSet {
@@ -182,9 +185,9 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 			fmt.Printf("\nFound LB:\n%s\n    in Region: %s\n    in AWS Account: %s (profile '%s')\n\n", lb, region, associatedAwsAccount, profile)
 		}
 	case "s3":
-		bucketName := findS3Bucket(cfg, region, resourceName)
-		if bucketName != "" {
-			fmt.Printf("S3 bucket: %s -> AWS account: %s (profile '%s')\n", bucketName, associatedAwsAccount, profile)
+		bucketsSlice := findS3Bucket(cfg, region, resourceName)
+		for _, bucket := range bucketsSlice {
+			fmt.Printf("\nFound S3 bucket: %s\n    in Region: %s\n    in AWS Account: %s (profile '%s')\n\n", bucket, region, associatedAwsAccount, profile)
 		}
 	case "dns":
 		dnsRecordsMap := findDns(cfg, region, resourceName)
