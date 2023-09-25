@@ -180,11 +180,13 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 	case "loadbalancer":
 		lbArnSlice, _ := findLoadBalancer(cfg, region, resourceName)
 		if lbArnSlice != nil {
-			fmt.Printf("Region: %s\nAWS Account: %s\nLB Details: %s\n", lbArnSlice[3], lbArnSlice[4], lbArnSlice[5])
+			fmt.Printf("Found LB:\n%s\n    in Region: %s\n    in AWS Account: %s (profile '%s')\n\n", lbArnSlice[5], region, associatedAwsAccount, profile)
 		}
 	case "s3":
 		bucketName := findS3Bucket(cfg, region, resourceName)
 		if bucketName != "" {
+			fmt.Printf("S3 bucket: %s -> AWS account: %s (profile '%s')\n", bucketName, associatedAwsAccount, profile)
+		}
 	case "dns":
 		dnsRecordsMap := findDns(cfg, region, resourceName)
 		if len(dnsRecordsMap) == 0 {
