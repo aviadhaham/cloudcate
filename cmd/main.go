@@ -231,6 +231,8 @@ func main() {
 	fmt.Scanln(&resourceName)
 	fmt.Print("\nEnter the resource type [e.g., dns, s3, loadbalancer]: ")
 	fmt.Scanln(&resourceType)
+	fmt.Println(strings.Repeat("*", 120))
+
 
 	var wg sync.WaitGroup
 
