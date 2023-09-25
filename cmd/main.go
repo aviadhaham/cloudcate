@@ -103,17 +103,16 @@ func findLoadBalancer(config aws.Config, region string, searchValue string) ([]s
 		fmt.Printf("Unable to list load balancers, %v", err)
 	}
 
+	filteredLoadBalancers := []string{}
 	if output != nil {
-		loadBalancers := output.LoadBalancers
-		for _, lb := range loadBalancers {
+		for _, lb := range output.LoadBalancers {
 			if strings.Contains(*lb.LoadBalancerArn, searchValue) {
-				lbArnSlice := strings.Split(*lb.LoadBalancerArn, ":")
-				return lbArnSlice, nil
+				filteredLoadBalancers = append(filteredLoadBalancers, *lb.LoadBalancerArn)
 			}
 		}
 	}
 
-	return nil, err
+	return filteredLoadBalancers, nil
 }
 
 func findS3Bucket(config aws.Config, region string, searchValue string) string {
@@ -178,9 +177,9 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 
 	switch resourceType {
 	case "loadbalancer":
-		lbArnSlice, _ := findLoadBalancer(cfg, region, resourceName)
-		if lbArnSlice != nil {
-			fmt.Printf("Found LB:\n%s\n    in Region: %s\n    in AWS Account: %s (profile '%s')\n\n", lbArnSlice[5], region, associatedAwsAccount, profile)
+		lbSlice, _ := findLoadBalancer(cfg, region, resourceName)
+		for _, lb := range lbSlice {
+			fmt.Printf("\nFound LB:\n%s\n    in Region: %s\n    in AWS Account: %s (profile '%s')\n\n", lb, region, associatedAwsAccount, profile)
 		}
 	case "s3":
 		bucketName := findS3Bucket(cfg, region, resourceName)
