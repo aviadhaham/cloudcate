@@ -233,6 +233,14 @@ func main() {
 	fmt.Scanln(&resourceType)
 	fmt.Println(strings.Repeat("*", 120))
 
+	if _, ok := resourceGlobality[resourceType]; !ok {
+		fmt.Printf("\nInvalid resource type '%s'. Valid resource types are: [ ", resourceType)
+		for key := range resourceGlobality {
+			fmt.Printf("%s ", key)
+		}
+		fmt.Print("]\n")
+		os.Exit(1)
+	}
 
 	var wg sync.WaitGroup
 
