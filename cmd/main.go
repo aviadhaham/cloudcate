@@ -216,14 +216,12 @@ func main() {
 		"dns":          true,
 	}
 
-	// resourceName := "1954630134"
-	// resourceType := "loadbalancer"
-
-	//resourceName := "marketplace"
-	//resourceType := "s3"
-
-	resourceName := "rancher"
-	resourceType := "dns"
+	var resourceName string
+	var resourceType string
+	fmt.Print("\nEnter resource string/substring you wish to search name: ")
+	fmt.Scanln(&resourceName)
+	fmt.Print("\nEnter the resource type [e.g., dns, s3, loadbalancer]: ")
+	fmt.Scanln(&resourceType)
 
 	var wg sync.WaitGroup
 
