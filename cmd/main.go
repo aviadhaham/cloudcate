@@ -80,8 +80,11 @@ func getAwsAccount(cfg aws.Config, region string) string {
 	stsClient := sts.NewFromConfig(cfg)
 	identity, err := stsClient.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
 	if err != nil {
-		fmt.Println("Unable to get caller identity:", err)
+		var accessDeniedErr *awshttp.ResponseError
+		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
 		return ""
+	}
+		fmt.Printf("\nUnable to get caller identity: %v\nRegion: %s\n", err, region)
 	}
 	return *identity.Account
 }
