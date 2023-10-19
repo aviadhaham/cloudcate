@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AWS Resource Search</title>
+  
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+  
+</head>
+
+<body>
+
+    <div class="container" class="bg-dark">
+
+        <h1>AWS Resource Search</h1>
+
+        <form id="search-form" class="search-form">
+
+            <div class="form-group">
+                <label for="resource-name">Resource Name (may be partial)</label>
+                <input type="text" placeholder="Enter name" id="resource-name" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="resource-type">Resource Type</label>
+                <select id="resource-type" class="form-control">
+                    <option value="dns">DNS Entry</option>  
+                    <option value="loadbalancer">ELB</option>
+                    <option value="s3">S3 Bucket</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Search AWS</button>
+
+        </form>
+
+        <div id="search-results">
+            <div class="spinner-border" role="status" hidden>
+                <span class="sr-only">Searching...</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add script tag for index.js -->
+    <script src="index.js"></script>
+
+</body>
+</html>

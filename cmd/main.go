@@ -10,10 +10,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/gin-gonic/gin"
 
+	"net/http"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
 	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
@@ -86,8 +89,8 @@ func getAwsAccount(cfg aws.Config, region string) string {
 	if err != nil {
 		var accessDeniedErr *awshttp.ResponseError
 		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
-		return ""
-	}
+			return ""
+		}
 		fmt.Printf("\nUnable to get caller identity: %v\nRegion: %s\n", err, region)
 	}
 	return *identity.Account
@@ -135,8 +138,8 @@ func findS3Bucket(config aws.Config, region string, searchValue string) []string
 
 	filteredS3Buckets := []string{}
 	if output != nil {
-	for _, bucket := range output.Buckets {
-		if strings.Contains(*bucket.Name, searchValue) {
+		for _, bucket := range output.Buckets {
+			if strings.Contains(*bucket.Name, searchValue) {
 				filteredS3Buckets = append(filteredS3Buckets, *bucket.Name)
 			}
 		}
@@ -179,8 +182,9 @@ func findDns(config aws.Config, region string, searchValue string) map[string][]
 	return filteredRecordsMap
 }
 
-func findResourceInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) {
+func findResourceInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) (interface{}, error) {
 	associatedAwsAccount := getAwsAccount(cfg, region)
+	var results []string
 
 	switch resourceType {
 	case "loadbalancer":
@@ -190,25 +194,81 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 		}
 	case "s3":
 		bucketsSlice := findS3Bucket(cfg, region, resourceName)
+		if bucketsSlice == nil {
+			return nil, fmt.Errorf("no S3 buckets found")
+		}
+
 		for _, bucket := range bucketsSlice {
 			fmt.Printf("\nFound S3 bucket: %s\n    in Region: %s\n    in AWS Account: %s (profile '%s')\n\n", bucket, region, associatedAwsAccount, profile)
 		}
 	case "dns":
 		dnsRecordsMap := findDns(cfg, region, resourceName)
 		if len(dnsRecordsMap) == 0 {
-			fmt.Printf("\n%s\n************** No DNS records were found for '%s' in AWS account '%s' (%s) **************\n", strings.Repeat("-", 120), resourceName, associatedAwsAccount, profile)
-			break
+			return nil, fmt.Errorf("no DNS records found")
 		}
-		for zoneName, dnsRecords := range dnsRecordsMap {
-			fmt.Printf("\n%s\n************** Zone name %s (from AWS account '%s' - profile '%s') **************\n", strings.Repeat("-", 120), zoneName, associatedAwsAccount, profile)
-			for _, dnsRecord := range dnsRecords {
-				fmt.Printf("DNS record '%s' || type '%s'\n", *dnsRecord.Name, dnsRecord.Type)
-			}
-		}
+		return dnsRecordsMap, nil
+		// for zoneName, dnsRecords := range dnsRecordsMap {
+		// 	fmt.Printf("\n%s\n************** Zone name %s (from AWS account '%s' - profile '%s') **************\n", strings.Repeat("-", 120), zoneName, associatedAwsAccount, profile)
+		// 	for _, dnsRecord := range dnsRecords {
+		// 		fmt.Printf("DNS record '%s' || type '%s'\n", *dnsRecord.Name, dnsRecord.Type)
+		// 	}
+		// }
 	}
 }
 
+func searchResources(profiles []string, regions []string, resourceGlobality map[string]bool, resourceType string, resourceName string) ([]string, error) {
+	var results []string
+	var wg sync.WaitGroup
+	resultChan := make(chan []string)
+
+	for _, profile := range profiles {
+		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
+		if err != nil {
+			return nil, fmt.Errorf("failed to load configuration for profile, %v", err)
+		}
+
+		if resourceGlobality[resourceType] {
+			wg.Add(1)
+			go func(profile string, cfg aws.Config, region string) {
+				defer wg.Done()
+				res, err := findResourceInRegion(profile, cfg, region, resourceType, resourceName)
+				if err != nil {
+					log.Printf("error searching for resources in region %s: %v", region, err)
+					return
+				}
+				resultChan <- res
+			}(profile, cfg, regions[0])
+			continue
+		}
+
+		for _, region := range regions {
+			wg.Add(1)
+			go func(profile string, cfg aws.Config, region string) {
+				defer wg.Done()
+				res, err := findResourceInRegion(profile, cfg, region, resourceType, resourceName)
+				if err != nil {
+					log.Printf("error searching for resources in region %s: %v", region, err)
+					return
+				}
+				resultChan <- res
+			}(profile, cfg, region)
+		}
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	for res := range resultChan {
+		results = append(results, res...)
+	}
+
+	return results, nil
+}
+
 func main() {
+
 	profiles, err := getProfiles()
 	if err != nil {
 		log.Fatalf("Failed to get profiles: %v", err)
@@ -225,47 +285,29 @@ func main() {
 		"dns":          true,
 	}
 
-	var resourceName string
-	var resourceType string
-	fmt.Print("\nEnter resource string/substring you wish to search name: ")
-	fmt.Scanln(&resourceName)
-	fmt.Print("\nEnter the resource type [e.g., dns, s3, loadbalancer]: ")
-	fmt.Scanln(&resourceType)
-	fmt.Println(strings.Repeat("*", 120))
+	r := gin.Default()
 
-	if _, ok := resourceGlobality[resourceType]; !ok {
-		fmt.Printf("\nInvalid resource type '%s'. Valid resource types are: [ ", resourceType)
-		for key := range resourceGlobality {
-			fmt.Printf("%s ", key)
-		}
-		fmt.Print("]\n")
-		os.Exit(1)
-	}
+	r.GET("/search", func(c *gin.Context) {
+		resourceName := c.Query("resource_name")
+		resourceType := c.Query("resource_type")
 
-	var wg sync.WaitGroup
-
-	for _, profile := range profiles {
-		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
+		results, err := searchResources(profiles, regions, resourceGlobality, resourceType, resourceName)
 		if err != nil {
-			log.Fatalf("failed to load configuration for profile, %v", err)
+			log.Fatalf("Failed to search resources: %v", err)
 		}
 
-		if resourceGlobality[resourceType] {
-			wg.Add(1)
-			go func(profile string, cfg aws.Config, region string) {
-				defer wg.Done()
-				findResourceInRegion(profile, cfg, region, resourceType, resourceName)
-			}(profile, cfg, regions[0])
-			continue
-		}
+		c.JSON(http.StatusOK, gin.H{
+			"message": results,
+		})
+	})
 
-		for _, region := range regions {
-			wg.Add(1)
-			go func(profile string, cfg aws.Config, region string) {
-				defer wg.Done()
-				findResourceInRegion(profile, cfg, region, resourceType, resourceName)
-			}(profile, cfg, region)
-		}
-	}
-	wg.Wait()
+	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+
+	// var resourceName string
+	// var resourceType string
+	// fmt.Print("\nEnter resource string/substring you wish to search name: ")
+	// fmt.Scanln(&resourceName)
+	// fmt.Print("\nEnter the resource type [e.g., dns, s3, loadbalancer]: ")
+	// fmt.Scanln(&resourceType)
+
 }
