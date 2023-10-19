@@ -182,7 +182,7 @@ func findDns(config aws.Config, region string, searchValue string) map[string][]
 	return filteredRecordsMap
 }
 
-func findResourceInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) (interface{}, error) {
+func findResourceInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) ([]string, error) {
 	associatedAwsAccount := getAwsAccount(cfg, region)
 	var results []string
 
@@ -190,7 +190,7 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 	case "loadbalancer":
 		lbSlice, _ := findLoadBalancer(cfg, region, resourceName)
 		for _, lb := range lbSlice {
-			fmt.Printf("\nFound LB:\n%s\n    in Region: %s\n    in AWS Account: %s (profile '%s')\n\n", lb, region, associatedAwsAccount, profile)
+			results = append(results, fmt.Sprintf("AWS Account: %s (profile '%s') || Load Balancer ARN: %s", associatedAwsAccount, profile, lb))
 		}
 	case "s3":
 		bucketsSlice := findS3Bucket(cfg, region, resourceName)
@@ -199,21 +199,20 @@ func findResourceInRegion(profile string, cfg aws.Config, region string, resourc
 		}
 
 		for _, bucket := range bucketsSlice {
-			fmt.Printf("\nFound S3 bucket: %s\n    in Region: %s\n    in AWS Account: %s (profile '%s')\n\n", bucket, region, associatedAwsAccount, profile)
+			results = append(results, fmt.Sprintf("AWS Account: %s (profile '%s') || Bucket name: %s", associatedAwsAccount, profile, bucket))
 		}
 	case "dns":
 		dnsRecordsMap := findDns(cfg, region, resourceName)
 		if len(dnsRecordsMap) == 0 {
 			return nil, fmt.Errorf("no DNS records found")
 		}
-		return dnsRecordsMap, nil
-		// for zoneName, dnsRecords := range dnsRecordsMap {
-		// 	fmt.Printf("\n%s\n************** Zone name %s (from AWS account '%s' - profile '%s') **************\n", strings.Repeat("-", 120), zoneName, associatedAwsAccount, profile)
-		// 	for _, dnsRecord := range dnsRecords {
-		// 		fmt.Printf("DNS record '%s' || type '%s'\n", *dnsRecord.Name, dnsRecord.Type)
-		// 	}
-		// }
+		for zoneName, dnsRecords := range dnsRecordsMap {
+			for _, dnsRecord := range dnsRecords {
+				results = append(results, fmt.Sprintf("AWS Account: %s (profile '%s') || Zone name: %s || Record name: %s || Record type: %s", associatedAwsAccount, profile, zoneName, *dnsRecord.Name, dnsRecord.Type))
+			}
+		}
 	}
+	return results, nil
 }
 
 func searchResources(profiles []string, regions []string, resourceGlobality map[string]bool, resourceType string, resourceName string) ([]string, error) {
@@ -286,6 +285,11 @@ func main() {
 	}
 
 	r := gin.Default()
+
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Next()
+	})
 
 	r.GET("/search", func(c *gin.Context) {
 		resourceName := c.Query("resource_name")
