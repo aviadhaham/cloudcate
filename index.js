@@ -1,5 +1,6 @@
 // Config
-const apiUrl = 'http://localhost:8080/search';
+const appPort = 8080;
+const apiUrl = `http://localhost:${appPort}/search`;
 
 // Select DOM elements 
 const form = document.getElementById('search-form');
@@ -35,25 +36,3 @@ form.addEventListener('submit', (e) => {
     });
 
 });
-//   fetch(apiUrl, { 
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json'
-//     },
-//     body: JSON.stringify({
-//       name,
-//       type 
-//     })
-//   })
-//   .then(response => response.json())
-//   .then(data => {
-
-//     // Hide loading spinner
-//     spinner.hidden = true;
-
-//     // Display results
-//     resultsDiv.innerText = JSON.stringify(data);
-
-//   });
-
-// });
