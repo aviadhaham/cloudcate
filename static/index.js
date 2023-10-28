@@ -1,6 +1,5 @@
 // Config
-const appPort = 8080;
-const apiUrl = `http://localhost:${appPort}/search`;
+const apiUrl = `http://localhost/search`;
 
 // Select DOM elements 
 const form = document.getElementById('search-form');

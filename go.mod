@@ -1,4 +1,4 @@
-module github.com/aviadhaham/awsearch
+module github.com/aviadhaham/cloudcate-service
 
 go 1.20
 
