@@ -6,11 +6,12 @@ import (
 	"log"
 	"sync"
 
+	config "github.com/aviadhaham/cloudcate-service/internal/aws_search/config"
 	general "github.com/aviadhaham/cloudcate-service/internal/aws_search/search/general"
 	services "github.com/aviadhaham/cloudcate-service/internal/aws_search/search/services"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
+	aws_config "github.com/aws/aws-sdk-go-v2/config"
 )
 
 func findResourcesInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) ([]interface{}, error) {
@@ -64,22 +65,34 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 				})
 			}
 		}
+	case "iam":
+		accessKey, user := services.FindIam(cfg, region, resourceName)
+		if accessKey != "" && user != "" {
+			results = append(results, IamSearchResult{
+				SearchResult: SearchResult{
+					Account: associatedAwsAccount,
+					Profile: profile,
+					Region:  region,
+				},
+				UserName: user,
+			})
+		}
 	}
 	return results, nil
 }
 
-func FindResources(profiles []string, regions []string, resourceGlobality map[string]bool, resourceType string, resourceName string) ([]interface{}, error) {
+func FindResources(profiles []string, regions []string, servicesGlobality map[string]bool, resourceType string, resourceName string) ([]interface{}, error) {
 	var results []interface{}
 	var wg sync.WaitGroup
 	resultChan := make(chan []interface{})
 
 	for _, profile := range profiles {
-		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
+		cfg, err := aws_config.LoadDefaultConfig(context.TODO(), aws_config.WithSharedConfigProfile(profile))
 		if err != nil {
 			return nil, fmt.Errorf("failed to load configuration for profile, %v", err)
 		}
 
-		if resourceGlobality[resourceType] {
+		if config.ServicesGlobality[resourceType] {
 			wg.Add(1)
 			go func(profile string, cfg aws.Config, region string) {
 				defer wg.Done()

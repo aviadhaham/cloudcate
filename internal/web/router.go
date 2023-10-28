@@ -26,7 +26,7 @@ func NewRouter(profiles []string, regions []string) *gin.Engine {
 		resourceName := c.Query("resource_name")
 		resourceType := c.Query("resource_type")
 
-		results, err := search.FindResources(profiles, regions, config.ResourceGlobality, resourceType, resourceName)
+		results, err := search.FindResources(profiles, regions, config.ServicesGlobality, resourceType, resourceName)
 		if err != nil {
 			log.Fatalf("Failed to search resources: %v", err)
 		}
