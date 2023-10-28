@@ -22,3 +22,8 @@ type DNSSearchResult struct {
 	DnsRecordName  string `json:"dns_record_name"`
 	DnsRecordType  string `json:"dns_record_type"`
 }
+
+type IamSearchResult struct {
+	SearchResult
+	UserName string `json:"user_name"`
+}
