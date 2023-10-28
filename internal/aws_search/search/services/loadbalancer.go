@@ -28,8 +28,9 @@ func FindLoadBalancer(config aws.Config, region string, searchValue string) ([]s
 	filteredLoadBalancers := []string{}
 	if output != nil {
 		for _, lb := range output.LoadBalancers {
-			if strings.Contains(*lb.LoadBalancerArn, searchValue) {
+			if strings.Contains(*lb.LoadBalancerArn, searchValue) || strings.Contains(*lb.DNSName, searchValue) {
 				filteredLoadBalancers = append(filteredLoadBalancers, *lb.LoadBalancerArn)
+				fmt.Println(*lb.LoadBalancerArn)
 			}
 		}
 	}
