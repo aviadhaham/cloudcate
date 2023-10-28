@@ -21,12 +21,10 @@ func main() {
 		log.Fatalf("Failed to get regions: %v", err)
 	}
 
-	r := web.NewRouter(profiles, regions)
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		log.Fatalf("PORT environment variable not set")
+	if os.Getenv("PORT") == "" {
+		log.Fatalf("PORT env var is not set")
 	}
 
-	r.Run(fmt.Sprintf(":%s", port))
+	s := web.NewServer(os.Getenv("PORT"), profiles, regions)
+	s.Run()
 }
