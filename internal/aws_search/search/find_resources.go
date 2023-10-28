@@ -6,8 +6,8 @@ import (
 	"log"
 	"sync"
 
-	general "github.com/aviadhaham/cloudcate-service/internal/aws_search/general"
-	services "github.com/aviadhaham/cloudcate-service/internal/aws_search/services"
+	general "github.com/aviadhaham/cloudcate-service/internal/aws_search/search/general"
+	services "github.com/aviadhaham/cloudcate-service/internal/aws_search/search/services"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"

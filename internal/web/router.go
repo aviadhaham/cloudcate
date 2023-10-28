@@ -13,6 +13,8 @@ import (
 func NewRouter(profiles []string, regions []string) *gin.Engine {
 	r := gin.Default()
 
+	r.Use(CORS())
+
 	// Serve static files from the "static" directory
 	r.Static("/static", "./static")
 
