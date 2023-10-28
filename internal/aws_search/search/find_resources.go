@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	config "github.com/aviadhaham/cloudcate-service/internal/aws_search/config"
-	general "github.com/aviadhaham/cloudcate-service/internal/aws_search/search/general"
 	services "github.com/aviadhaham/cloudcate-service/internal/aws_search/search/services"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -15,7 +14,7 @@ import (
 )
 
 func findResourcesInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) ([]interface{}, error) {
-	associatedAwsAccount := general.GetAwsAccount(cfg, region)
+	associatedAwsAccount := GetAwsAccount(cfg, region)
 	var results []interface{}
 
 	switch resourceType {

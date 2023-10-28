@@ -1,22 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
-	general "github.com/aviadhaham/cloudcate-service/internal/aws_search/search/general"
+	aws_search "github.com/aviadhaham/cloudcate-service/internal/aws_search/search"
 	"github.com/aviadhaham/cloudcate-service/internal/web"
 )
 
 func main() {
-
-	profiles, err := general.GetProfiles()
+	profiles, err := aws_search.GetProfiles()
 	if err != nil {
 		log.Fatalf("Failed to get profiles: %v", err)
 	}
 
-	regions, err := general.GetRegions(profiles[0])
+	regions, err := aws_search.GetRegions(profiles[0])
 	if err != nil {
 		log.Fatalf("Failed to get regions: %v", err)
 	}
