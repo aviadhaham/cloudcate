@@ -1,6 +1,3 @@
-// Config
-const apiUrl = `http://localhost/search`;
-
 // Select DOM elements 
 const form = document.getElementById('search-form');
 const resourceNameInput = document.getElementById('resource-name');
@@ -21,7 +18,7 @@ form.addEventListener('submit', (e) => {
   const resourceType = resourceTypeSelect.value;
 
     // Make POST request to API
-    const url = `${apiUrl}?resource_name=${resourceName}&resource_type=${resourceType}`;
+    const url = `search/?resource_name=${resourceName}&resource_type=${resourceType}`;
     fetch(url)
     .then(response => response.json())
     .then(data => {
