@@ -27,3 +27,9 @@ type IamSearchResult struct {
 	SearchResult
 	UserName string `json:"user_name"`
 }
+
+type ElasticIpSearchResult struct {
+	SearchResult
+	PublicIp   string `json:"public_ip"`
+	InstanceId string `json:"instance_id"`
+}

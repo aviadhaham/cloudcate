@@ -5,4 +5,5 @@ var ServicesGlobality = map[string]bool{
 	"s3":           true,
 	"dns":          true,
 	"iam":          true,
+	"elastic_ip":   false,
 }

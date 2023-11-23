@@ -76,7 +76,30 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 				UserName: user,
 			})
 		}
+	case "elastic_ip":
+		addresses, err := services.FindElasticIp(cfg, region, resourceName)
+		if err != nil {
+			return nil, fmt.Errorf("error finding elastic IP addresses: %v", err)
+		}
+
+		for _, address := range addresses {
+			elasticIpSearchResult := ElasticIpSearchResult{
+				SearchResult: SearchResult{
+					Account: associatedAwsAccount,
+					Profile: profile,
+					Region:  region,
+				},
+				PublicIp: *address.PublicIp,
+			}
+
+			if address.InstanceId != nil && *address.InstanceId != "" {
+				elasticIpSearchResult.InstanceId = *address.InstanceId
+			}
+
+			results = append(results, elasticIpSearchResult)
+		}
 	}
+
 	return results, nil
 }
 
