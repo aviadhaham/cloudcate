@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 )
 
-func FindIam(config aws.Config, region string, searchValue string) (string, string) {
+func FindIam(config aws.Config, region string, searchValue string) (string, string, error) {
 
 	config.Region = region
 
@@ -17,20 +17,20 @@ func FindIam(config aws.Config, region string, searchValue string) (string, stri
 	accessKey := searchValue
 	users, err := iamClient.ListUsers(context.TODO(), &iam.ListUsersInput{})
 	if err != nil {
-		panic(fmt.Errorf("failed to list IAM users: %v", err))
+		return "", "", fmt.Errorf("failed to list IAM users: %v", err)
 	}
 	for _, user := range users.Users {
 		accessKeys, err := iamClient.ListAccessKeys(context.TODO(), &iam.ListAccessKeysInput{
 			UserName: user.UserName,
 		})
 		if err != nil {
-			panic(fmt.Errorf("failed to list access keys for user %s: %v", *user.UserName, err))
+			return "", "", fmt.Errorf("failed to list access keys for user %s: %v", *user.UserName, err)
 		}
 		for _, accessKeyMetadata := range accessKeys.AccessKeyMetadata {
 			if *accessKeyMetadata.AccessKeyId == accessKey {
-				return accessKey, *user.UserName
+				return accessKey, *user.UserName, nil
 			}
 		}
 	}
-	return "", ""
+	return "", "", nil
 }

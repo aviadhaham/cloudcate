@@ -65,7 +65,10 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 			}
 		}
 	case "iam":
-		accessKey, user := services.FindIam(cfg, region, resourceName)
+		accessKey, user, err := services.FindIam(cfg, region, resourceName)
+		if err != nil {
+			log.Println(err)
+		}
 		if accessKey != "" && user != "" {
 			results = append(results, IamSearchResult{
 				SearchResult: SearchResult{
