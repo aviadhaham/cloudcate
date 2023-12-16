@@ -106,7 +106,7 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 	return results, nil
 }
 
-func FindResources(profiles []string, regions []string, servicesGlobality map[string]bool, resourceType string, resourceName string) ([]interface{}, error) {
+func FindResources(profiles []string, servicesGlobality map[string]bool, resourceType string, resourceName string) ([]interface{}, error) {
 	var results []interface{}
 	var wg sync.WaitGroup
 	resultChan := make(chan []interface{})
@@ -115,6 +115,11 @@ func FindResources(profiles []string, regions []string, servicesGlobality map[st
 		cfg, err := aws_config.LoadDefaultConfig(context.TODO(), aws_config.WithSharedConfigProfile(profile))
 		if err != nil {
 			return nil, fmt.Errorf("failed to load configuration for profile, %v", err)
+		}
+
+		regions, err := GetRegions(profile)
+		if err != nil {
+			log.Fatalf("Failed to get regions: %v", err)
 		}
 
 		if config.ServicesGlobality[resourceType] {

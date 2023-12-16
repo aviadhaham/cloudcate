@@ -10,16 +10,15 @@ type server struct {
 	regions  []string
 }
 
-func NewServer(port string, profiles []string, regions []string) *server {
+func NewServer(port string, profiles []string) *server {
 	return &server{
 		port:     port,
 		profiles: profiles,
-		regions:  regions,
 	}
 }
 
 func (s *server) Run() {
-	r := NewRouter(s.profiles, s.regions)
+	r := NewRouter(s.profiles)
 
 	err := r.Run(":" + s.port)
 	if err != nil {

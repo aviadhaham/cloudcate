@@ -14,15 +14,10 @@ func main() {
 		log.Fatalf("Failed to get profiles: %v", err)
 	}
 
-	regions, err := aws_search.GetRegions(profiles[0])
-	if err != nil {
-		log.Fatalf("Failed to get regions: %v", err)
-	}
-
 	if os.Getenv("PORT") == "" {
 		log.Fatalf("PORT env var is not set")
 	}
 
-	s := web.NewServer(os.Getenv("PORT"), profiles, regions)
+	s := web.NewServer(os.Getenv("PORT"), profiles)
 	s.Run()
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(profiles []string, regions []string) *gin.Engine {
+func NewRouter(profiles []string) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(CORS())
@@ -26,7 +26,7 @@ func NewRouter(profiles []string, regions []string) *gin.Engine {
 		resourceName := c.Query("resource_name")
 		resourceType := c.Query("resource_type")
 
-		results, err := search.FindResources(profiles, regions, config.ServicesGlobality, resourceType, resourceName)
+		results, err := search.FindResources(profiles, config.ServicesGlobality, resourceType, resourceName)
 		if err != nil {
 			log.Fatalf("Failed to search resources: %v", err)
 		}
