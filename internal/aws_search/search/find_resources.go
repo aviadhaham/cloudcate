@@ -48,6 +48,15 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 				InstanceId: *instance.InstanceId,
 			}
 
+			if instance.Tags != nil {
+				for _, tag := range instance.Tags {
+					if *tag.Key == "Name" {
+						ec2SearchResult.InstanceName = *tag.Value
+						break
+					}
+				}
+			}
+
 			if instance.PrivateIpAddress != nil {
 				ec2SearchResult.PrivateIpAddress = *instance.PrivateIpAddress
 			}

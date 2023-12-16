@@ -9,6 +9,7 @@ type SearchResult struct {
 type Ec2SearchResult struct {
 	SearchResult
 	InstanceId       string `json:"instance_id"`
+	InstanceName     string `json:"instance_name"`
 	PrivateIpAddress string `json:"private_ip_address"`
 	PrivateDnsName   string `json:"private_dns_name"`
 	PublicDnsName    string `json:"public_dns_name"`
