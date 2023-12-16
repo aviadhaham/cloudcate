@@ -8,7 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/aws/aws-sdk-go-v2/config"
+	config "github.com/aviadhaham/cloudcate-service/internal/aws_search/config"
+	aws_config "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
@@ -39,7 +40,7 @@ func GetRegions(profile string) ([]string, error) {
 
 	// use .aws/credentials file to get profiles, but use only the first one in the file
 	// hardcoded region to us-east-1, because there's no chance it's not going to be active
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
+	cfg, err := aws_config.LoadDefaultConfig(context.TODO(), aws_config.WithSharedConfigProfile(profile))
 	if err != nil {
 		log.Fatalf("failed to load configuration for profile, %v", err)
 	}
@@ -57,8 +58,9 @@ func GetRegions(profile string) ([]string, error) {
 
 	resp, err := client.DescribeRegions(context.TODO(), input)
 	if err != nil {
-		log.Fatalf("failed to describe regions, %v", err)
-		return nil, err
+		log.Printf("profile '%s', failed to describe regions, %v", profile, err)
+		// Return a hardcoded list of regions instead of terminating the application
+		return config.AwsFullRegionsList, nil
 	}
 
 	regionsList := []string{}
@@ -66,5 +68,5 @@ func GetRegions(profile string) ([]string, error) {
 		regionsList = append(regionsList, *region.RegionName)
 	}
 
-	return regionsList, err
+	return regionsList, nil
 }
