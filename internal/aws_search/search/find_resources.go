@@ -30,6 +30,39 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 				LoadBalancerArn: lb,
 			})
 		}
+	case "ec2":
+		instances, err := services.FindEc2(cfg, region, resourceName)
+		if err != nil {
+			return nil, fmt.Errorf("error finding EC2 instances: %v", err)
+		}
+		if len(instances) == 0 {
+			return nil, fmt.Errorf("no EC2 instances found")
+		}
+		for _, instance := range instances {
+			ec2SearchResult := Ec2SearchResult{
+				SearchResult: SearchResult{
+					Account: associatedAwsAccount,
+					Profile: profile,
+					Region:  region,
+				},
+				InstanceId: *instance.InstanceId,
+			}
+
+			if instance.PrivateIpAddress != nil {
+				ec2SearchResult.PrivateIpAddress = *instance.PrivateIpAddress
+			}
+			if instance.PrivateDnsName != nil {
+				ec2SearchResult.PrivateDnsName = *instance.PrivateDnsName
+			}
+			if instance.PublicDnsName != nil {
+				ec2SearchResult.PublicDnsName = *instance.PublicDnsName
+			}
+			if instance.PublicIpAddress != nil {
+				ec2SearchResult.PublicIpAddress = *instance.PublicIpAddress
+			}
+
+			results = append(results, ec2SearchResult)
+		}
 	case "s3":
 		bucketsSlice := services.FindS3Bucket(cfg, region, resourceName)
 		if bucketsSlice == nil {

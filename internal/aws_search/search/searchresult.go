@@ -6,6 +6,15 @@ type SearchResult struct {
 	Region  string `json:"region"`
 }
 
+type Ec2SearchResult struct {
+	SearchResult
+	InstanceId       string `json:"instance_id"`
+	PrivateIpAddress string `json:"private_ip_address"`
+	PrivateDnsName   string `json:"private_dns_name"`
+	PublicDnsName    string `json:"public_dns_name"`
+	PublicIpAddress  string `json:"public_ip_address"`
+}
+
 type LoadBalancerSearchResult struct {
 	SearchResult
 	LoadBalancerArn string `json:"load_balancer_arn"`

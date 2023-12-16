@@ -27,9 +27,10 @@
             <div class="form-group">
                 <label for="resource-type">Resource Type</label>
                 <select id="resource-type" class="form-control">
+                    <option value="s3">S3 Bucket</option>
                     <option value="dns">DNS (Hosted Zone or Record) </option>  
                     <option value="loadbalancer">Load Balancer</option>
-                    <option value="s3">S3 Bucket</option>
+                    <option value="ec2">EC2 Instance (by IP, DNS, or Tags)</option>
                     <option value="iam">IAM (Access Key)</option>
                     <option value="elastic_ip">Elastic IP</option>
                 </select>
