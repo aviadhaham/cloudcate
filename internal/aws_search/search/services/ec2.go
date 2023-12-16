@@ -23,18 +23,20 @@ func FindEc2(config aws.Config, region string, searchValue string) ([]types.Inst
 		return nil, err
 	}
 
+	searchValue = strings.ToLower(searchValue)
+
 	filteredInstances := []types.Instance{}
 	if output != nil {
 		for _, reservation := range output.Reservations {
 			for _, instance := range reservation.Instances {
-				if instance.PrivateDnsName != nil && strings.Contains(*instance.PrivateDnsName, searchValue) ||
+				if instance.PrivateDnsName != nil && strings.Contains(strings.ToLower(*instance.PrivateDnsName), searchValue) ||
 					instance.PrivateIpAddress != nil && strings.Contains(*instance.PrivateIpAddress, searchValue) ||
-					instance.PublicDnsName != nil && strings.Contains(*instance.PublicDnsName, searchValue) ||
+					instance.PublicDnsName != nil && strings.Contains(strings.ToLower(*instance.PublicDnsName), searchValue) ||
 					instance.PublicIpAddress != nil && strings.Contains(*instance.PublicIpAddress, searchValue) {
 					filteredInstances = append(filteredInstances, instance)
 				}
 				for _, tag := range instance.Tags {
-					if tag.Key != nil && strings.Contains(*tag.Key, searchValue) || tag.Value != nil && strings.Contains(*tag.Value, searchValue) {
+					if tag.Key != nil && strings.Contains(strings.ToLower(*tag.Key), searchValue) || tag.Value != nil && strings.Contains(strings.ToLower(*tag.Value), searchValue) {
 						filteredInstances = append(filteredInstances, instance)
 						break
 					}

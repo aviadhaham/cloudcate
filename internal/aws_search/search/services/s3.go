@@ -25,6 +25,8 @@ func FindS3Bucket(config aws.Config, region string, searchValue string) []string
 		return nil
 	}
 
+	searchValue = strings.ToLower(searchValue)
+
 	filteredS3Buckets := []string{}
 	if output != nil {
 		for _, bucket := range output.Buckets {

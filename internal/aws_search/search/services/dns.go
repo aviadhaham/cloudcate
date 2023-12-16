@@ -27,6 +27,8 @@ func FindDns(config aws.Config, region string, searchValue string) map[string][]
 		return nil
 	}
 
+	searchValue = strings.ToLower(searchValue)
+
 	filteredRecordsMap := make(map[string][]types.ResourceRecordSet)
 	for _, zone := range hostedZones.HostedZones {
 		recordSets, err := route53Client.ListResourceRecordSets(context.TODO(), &route53.ListResourceRecordSetsInput{
