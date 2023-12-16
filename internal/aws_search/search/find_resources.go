@@ -128,7 +128,7 @@ func FindResources(profiles []string, servicesGlobality map[string]bool, resourc
 				defer wg.Done()
 				res, err := findResourcesInRegion(profile, cfg, region, resourceType, resourceName)
 				if err != nil {
-					log.Printf("error searching for resources in region %s: %v", region, err)
+					log.Printf("profile '%s', error searching for resources in region %s: %v", profile, region, err)
 					return
 				}
 				resultChan <- res
@@ -142,7 +142,7 @@ func FindResources(profiles []string, servicesGlobality map[string]bool, resourc
 				defer wg.Done()
 				res, err := findResourcesInRegion(profile, cfg, region, resourceType, resourceName)
 				if err != nil {
-					log.Printf("error searching for resources in region %s: %v", region, err)
+					log.Printf("profile '%s', error searching for resources in region %s: %v", profile, region, err)
 					return
 				}
 				resultChan <- res
