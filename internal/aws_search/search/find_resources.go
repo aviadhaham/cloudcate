@@ -41,7 +41,6 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 				SearchResult: SearchResult{
 					Account: associatedAwsAccount,
 					Profile: profile,
-					Region:  region,
 				},
 				BucketName: bucket,
 			})
@@ -57,7 +56,6 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 					SearchResult: SearchResult{
 						Account: associatedAwsAccount,
 						Profile: profile,
-						Region:  region,
 					},
 					HostedZoneName: zoneName,
 					DnsRecordName:  aws.ToString(dnsRecord.Name),
@@ -74,7 +72,6 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 				SearchResult: SearchResult{
 					Account: associatedAwsAccount,
 					Profile: profile,
-					Region:  region,
 				},
 				UserName: user,
 			})
