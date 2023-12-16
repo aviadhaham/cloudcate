@@ -15,9 +15,9 @@
 
     <div class="container" class="bg-dark">
 
-        <h1>AWS Resource Search</h1>
+        <h1 class="pt-4 font-weight-bold">AWS Resource Search</h1>
 
-        <form id="search-form" class="search-form">
+        <form id="search-form" class="search-form mt-4">
 
             <div class="form-group">
                 <label for="resource-name">Resource Name (may be partial)</label>
@@ -36,20 +36,19 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary">Search AWS</button>
-
+            <button type="submit" class="btn btn-primary mt-3 border border-dark">Search AWS</button>
         </form>
 
         <div class="mt-3 d-flex justify-content-center">
             <span id="search-spinner" style="display: none">Searching...</span>
 
             <div id="search-results"></div>
-        </div>
+            </div>
 
-    </div>
+            </div>
 
-    <!-- Add script tag for index.js -->
-    <script module="module" src="static/index.js"></script>
+            <!-- Add script tag for index.js -->
+            <script module="module" src="static/index.js"></script>
 
-</body>
+            </body>
 </html>
