@@ -2,19 +2,33 @@
 
 # CloudCate
 
-Hey there! 👋 CloudCate is a neat little tool that helps you find AWS resources like EC2 instances, S3 buckets, and more across different profiles and regions. It's built in Go and runs both as a simple local server or in a Docker container. Just plug in your AWS credentials, and you're good to go!
+Welcome to CloudCate! 🚀 This handy tool tackles the headache of searching for AWS resources across multiple accounts. Ever found yourself juggling between AWS accounts to track down resources? CloudCate is here to make your life easier by consolidating searches for various AWS resources into one simple, user-friendly interface.
+
+## What You Can Search
+
+Right out of the box, CloudCate lets you search across these AWS resource types in multiple accounts:
+- S3 Buckets
+- DNS (Hosted Zones or Records)
+- Load Balancers
+- EC2 Instances
+- IAM Access Keys
+- Elastic IPs
 
 ## Quick Start
 
-### What You Need
+### Prerequisites
 
-- Docker (if you're going the container route)
-- Go (for running locally)
-- Your AWS credentials set up in `.aws/credentials`
+Before diving in, make sure you have:
+- Docker (for Docker users) or Go (for local runners)
+- Your AWS CLI configured with `.aws/credentials` containing the profiles you want to search
+
+### Important Note on AWS Access
+
+It's crucial to ensure that the AWS access keys used with CloudCate have the necessary permissions to search the resources you're interested in. You're responsible for creating and managing these access keys safely. Make sure they're properly secured and have the right permissions set up across all accounts you plan to search.
 
 ### Run It Locally
 
-Got Go installed? Run this in the project's root:
+To get CloudCate up and running on your machine, execute:
 
 ```bash
 go run cmd/main.go
@@ -22,26 +36,29 @@ go run cmd/main.go
 
 ### Run It with Docker
 
-Prefer Docker? Build and run CloudCate with these commands:
+For a containerized experience, build and run CloudCate using the following commands:
 
-1. Build the image:
+1. **Build the Docker Image**
 
 ```bash
 docker build -t cloudcate .
 ```
 
-2. Run the container (don't forget to replace `/path/to/credentials` with your actual credentials path):
+2. **Run the Docker Container**
+
+Remember to replace `/path/to/credentials` with the actual path to your `.aws/credentials` file.
 
 ```bash
 docker run --rm -d -p 8080:80 -v /path/to/credentials:/root/.aws/credentials cloudcate:latest
 ```
 
-Now, CloudCate will be up at `http://localhost:8080`.
+CloudCate will now be accessible at `http://localhost:8080`.
 
 ## How to Use It
 
-Once CloudCate is running, head over to `http://localhost:8080`. You'll see a simple UI where you can pick the AWS service you're interested in (like EC2 or S3) and type in what you're looking for. Hit search, and it'll comb through your profiles and regions to find the resources matching your query.
+Visit `http://localhost:8080` in your browser. The UI is straightforward: select the AWS service you're searching for (e.g., S3, EC2) and input your search terms. CloudCate will search through the specified AWS profiles and regions, showing you the resources that match your query.
+
 
 ## License
 
-This project is under the [MIT license](https://choosealicense.com/licenses/mit/).
+CloudCate is released under the [MIT license](https://choosealicense.com/licenses/mit/).
