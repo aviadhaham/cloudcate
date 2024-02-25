@@ -140,6 +140,25 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 
 			results = append(results, elasticIpSearchResult)
 		}
+	case "cloudfront":
+		distributions, err := services.FindCloudfront(cfg, region, resourceName)
+		if err != nil && len(distributions) == 0 {
+			return nil, fmt.Errorf("error finding cloudfront distributions: %v", err)
+		}
+
+		for _, distribution := range distributions {
+			cloudFrontSearchResult := CloudfrontSearchResult{
+				SearchResult: SearchResult{
+					Account: associatedAwsAccount,
+					Profile: profile,
+				},
+				DistributionArn: *distribution.ARN,
+				DistributionId:  *distribution.Id,
+				DomainName:      *distribution.DomainName,
+			}
+
+			results = append(results, cloudFrontSearchResult)
+		}
 	}
 
 	return results, nil

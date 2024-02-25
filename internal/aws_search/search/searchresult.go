@@ -43,3 +43,10 @@ type ElasticIpSearchResult struct {
 	PublicIp   string `json:"public_ip"`
 	InstanceId string `json:"instance_id"`
 }
+
+type CloudfrontSearchResult struct {
+	SearchResult
+	DistributionArn string `json:"distribution_arn"`
+	DistributionId  string `json:"distribution_id"`
+	DomainName      string `json:"domain_name"`
+}
