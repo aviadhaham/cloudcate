@@ -13,6 +13,7 @@ Right out of the box, CloudCate lets you search across these AWS resource types 
 - EC2 Instances
 - IAM Access Keys
 - Elastic IPs
+- CloudFront Distributions
 
 ## Quick Start
 
