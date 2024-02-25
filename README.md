@@ -31,6 +31,10 @@ It's crucial to ensure that the AWS access keys used with CloudCate have the nec
 To get CloudCate up and running on your machine, execute:
 
 ```bash
+export PORT=80
+```
+
+```bash
 go run cmd/main.go
 ```
 
