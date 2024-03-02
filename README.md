@@ -62,6 +62,10 @@ docker run --rm -d -p 8080:80 -v /path/to/credentials:/root/.aws/credentials clo
 
 CloudCate will now be accessible at `http://localhost:8080`.
 
+#### Example `docker-compose.yml` to run with Docker Compose
+[`docker-compose.yml`](docker-compose.yml)
+
+
 ## How to Use It
 
 Visit `http://localhost:8080` in your browser. The UI is straightforward: select the AWS service you're searching for (e.g., S3, EC2) and input your search terms. CloudCate will search through the specified AWS profiles and regions, showing you the resources that match your query.
