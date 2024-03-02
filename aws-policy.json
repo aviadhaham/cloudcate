@@ -1,0 +1,24 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"elasticloadbalancing:DescribeLoadBalancers",
+				"sts:AssumeRoleWithSAML",
+				"sts:AssumeRoleWithWebIdentity",
+				"ec2:DescribeRegions",
+				"ec2:DescribeInstances",
+				"ec2:DescribeAddresses",
+				"sts:GetCallerIdentity",
+				"s3:ListBucket",
+				"iam:ListUsers",
+				"iam:ListAccessKeys",
+				"route53:ListHostedZones",
+				"route53:ListResourceRecordSets",
+				"cloudfront:ListDistributions"
+			],
+			"Resource": "*"
+		}
+	]
+}

@@ -27,6 +27,9 @@ Before diving in, make sure you have:
 
 It's crucial to ensure that the AWS access keys used with CloudCate have the necessary permissions to search the resources you're interested in. You're responsible for creating and managing these access keys safely. Make sure they're properly secured and have the right permissions set up across all accounts you plan to search.
 
+#### Example AWS IAM Policy that should support all the operations:
+[`aws-policy.json`](aws-policy.json)
+
 ### Run It Locally
 
 To get CloudCate up and running on your machine, execute:
