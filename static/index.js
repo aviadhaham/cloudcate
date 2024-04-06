@@ -29,6 +29,10 @@ form.addEventListener('submit', (e) => {
   fetch(url)
     .then(response => response.json())
     .then(data => {
+      if (!data || data.results === null) {
+        resultsCount.innerText = 'No results found.';
+        return;
+      }
       // Build table dynamically
       let table = resultsDiv.appendChild(document.createElement('table'));
       table.style.borderCollapse = 'collapse';
@@ -72,7 +76,7 @@ form.addEventListener('submit', (e) => {
     })
     .catch((error) => {
       console.log(error);
-      resultsCount.innerText = 'Error occurred while fetching results.';
+        resultsCount.innerText = 'Error occurred while fetching results.';
     })
     .finally(() => {
       searchSpinner.style.display = 'none';
