@@ -31,8 +31,8 @@ form.addEventListener('submit', (e) => {
     .then(data => {
       // Build table dynamically
       let table = resultsDiv.appendChild(document.createElement('table'));
-      table.style.border = '1px solid black';
       table.style.borderCollapse = 'collapse';
+      table.classList.add('table');
 
       let tr = table.appendChild(document.createElement('tr'));
       const thRowNumber = document.createElement('th');
@@ -62,6 +62,8 @@ form.addEventListener('submit', (e) => {
           td.innerText = value;
           td.style.border = '1px solid black';
           td.style.padding = '5px';
+          td.style.wordBreak = 'break-all';
+          td.style.overflowWrap = 'break-word';
           tr.appendChild(td);
         });
       });
