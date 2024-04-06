@@ -27,7 +27,8 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 					Profile: profile,
 					Region:  region,
 				},
-				LoadBalancerArn: lb,
+				LoadBalancerName:    lb[0],
+				LoadBalancerDnsName: lb[1],
 			})
 		}
 	case "ec2":

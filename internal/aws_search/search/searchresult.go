@@ -18,7 +18,8 @@ type Ec2SearchResult struct {
 
 type LoadBalancerSearchResult struct {
 	SearchResult
-	LoadBalancerArn string `json:"load_balancer_arn"`
+	LoadBalancerName    string `json:"load_balancer_name"`
+	LoadBalancerDnsName string `json:"load_balancer_dns_name"`
 }
 
 type S3SearchResult struct {
