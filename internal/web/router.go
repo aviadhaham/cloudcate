@@ -7,34 +7,32 @@ import (
 	config "github.com/aviadhaham/cloudcate-service/internal/aws_search/config"
 	search "github.com/aviadhaham/cloudcate-service/internal/aws_search/search"
 
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
 func NewRouter(profiles []string) *gin.Engine {
 	r := gin.Default()
 
-	r.Use(CORS())
+	// Serve react app
+	r.Use(static.Serve("/", static.LocalFile("./web/dist", true)))
 
-	// Serve static files from the "static" directory
-	r.Static("/static", "./static")
+	api := r.Group("/api")
+	{
+		api.GET("/search", func(c *gin.Context) {
+			resourceName := c.Query("resource_name")
+			resourceType := c.Query("resource_type")
 
-	r.GET("/", func(c *gin.Context) {
-		c.File("static/index.html")
-	})
+			results, err := search.FindResources(profiles, config.ServicesGlobality, resourceType, resourceName)
+			if err != nil {
+				log.Fatalf("Failed to search resources: %v", err)
+			}
 
-	r.GET("/search", func(c *gin.Context) {
-		resourceName := c.Query("resource_name")
-		resourceType := c.Query("resource_type")
-
-		results, err := search.FindResources(profiles, config.ServicesGlobality, resourceType, resourceName)
-		if err != nil {
-			log.Fatalf("Failed to search resources: %v", err)
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"results": results,
+			c.JSON(http.StatusOK, gin.H{
+				"results": results,
+			})
 		})
-	})
+	}
 
 	return r
 }

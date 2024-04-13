@@ -1,0 +1,29 @@
+version: "3"
+
+tasks:
+  ui:dev:
+    desc: Start the UI
+    dir: web
+    cmds:
+      - pnpm dev
+  server:dev:
+    desc: Start the backend server
+    env:
+      PORT: 80
+    cmds:
+      - go run cmd/main.go
+
+  ui:build:
+    desc: Build UI for production
+    dir: web
+    cmds:
+      - pnpm run build
+  server:build:
+    desc: Build server for production
+    cmds:
+      - go build -o server cmd/main.go
+  server:
+    desc: Start the production server
+    deps: [ui:build, server:build]
+    cmds:
+      - ./server

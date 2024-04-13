@@ -14,6 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.40.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.51.1
 	github.com/aws/aws-sdk-go-v2/service/sts v1.28.1
+	github.com/gin-gonic/contrib v0.0.0-20221130124618-7e01895a63f2
 	github.com/gin-gonic/gin v1.9.1
 )
 
@@ -55,6 +56,6 @@ require (
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
