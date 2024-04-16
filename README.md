@@ -32,19 +32,36 @@ It's crucial to ensure that the AWS access keys used with CloudCate have the nec
 
 ### Run It Locally
 
-To get CloudCate up and running on your machine, execute:
+Using [Taskfile.yml](./Taskfile.yml)
 
+#### Start the UI
 ```bash
-export PORT=80
+task ui:dev
+```
+#### Start the backend server
+```bash
+task server:dev
 ```
 
+### Build for Production
+
+#### Build the UI
 ```bash
-go run cmd/main.go
+task ui:build
 ```
+#### Build the backend server
+```bash
+task server:build
+```
+
+To start the production server (this will automatically build the UI and server if they haven't been built yet):
+
+```bash
+task server
+```
+
 
 ### Run It with Docker
-
-For a containerized experience, build and run CloudCate using the following commands:
 
 1. **Build the Docker Image**
 
