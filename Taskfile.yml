@@ -5,6 +5,7 @@ tasks:
     desc: Start the UI
     dir: web
     cmds:
+      - pnpm install --frozen-lockfile
       - pnpm dev
   server:dev:
     desc: Start the backend server
