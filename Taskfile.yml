@@ -26,5 +26,7 @@ tasks:
   server:
     desc: Start the production server
     deps: [ui:build, server:build]
+    env:
+      PORT: 80
     cmds:
       - ./server
