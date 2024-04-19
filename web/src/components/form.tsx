@@ -17,6 +17,16 @@ type Props = {
   onResults: (data: AllSearchResults[]) => void;
 };
 
+function isSearchTermValid(searchTerm: string) {
+  if (searchTerm === "") {
+    return false;
+  } else if (searchTerm.trim() === "") {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 export default function Form(props: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -117,7 +127,14 @@ export default function Form(props: Props) {
             </Select>
           </div>
         </div>
-        <Button onClick={sendSearchRequest} className="self-end">
+        {/* <Button onClick={searchTerm == null ? sendSearchRequest: test} className="self-end"> */}
+        <Button onClick={
+            isSearchTermValid(searchTerm) == true
+              ? sendSearchRequest
+              : undefined
+          }
+          className="self-end"
+        >
           Search AWS
         </Button>
       </div>
