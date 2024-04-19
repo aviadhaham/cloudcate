@@ -43,6 +43,8 @@ task ui:dev
 task server:dev
 ```
 
+**Server would be availble at `http://localhost:5173`**
+
 ### Build for Production
 
 #### Build the UI
@@ -60,6 +62,7 @@ To start the production server (this will automatically build the UI and server 
 task server
 ```
 
+**Server would be availble at `http://localhost`**
 
 ### Run It with Docker
 
@@ -85,7 +88,7 @@ CloudCate will now be accessible at `http://localhost:8080`.
 
 ## How to Use It
 
-Visit `http://localhost:8080` in your browser. The UI is straightforward: select the AWS service you're searching for (e.g., S3, EC2) and input your search terms. CloudCate will search through the specified AWS profiles and regions, showing you the resources that match your query.
+Select the AWS service you're searching for (e.g., S3, EC2) and input your search terms. CloudCate will search through the specified AWS profiles and regions, showing you the resources that match your query.
 
 
 ## License
