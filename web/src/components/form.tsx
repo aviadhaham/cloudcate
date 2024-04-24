@@ -127,7 +127,6 @@ export default function Form(props: Props) {
             </Select>
           </div>
         </div>
-        {/* <Button onClick={searchTerm == null ? sendSearchRequest: test} className="self-end"> */}
         <Button onClick={
             isSearchTermValid(searchTerm) == true
               ? sendSearchRequest
