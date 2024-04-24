@@ -15,7 +15,12 @@ export default function HomePage() {
       <div className="flex flex-col w-full max-w-5xl mx-auto mt-5">
         <Header />
         <Form onResults={handleResults} />
-        <ResultsTable results={results} />
+        {results && results.length !== 0 && (
+          <ResultsTable results={results} />
+        )}
+        {results === null && (
+          <span className="mt-10 text-center">No results found.</span>
+        )}
       </div>
     </div>
   );
