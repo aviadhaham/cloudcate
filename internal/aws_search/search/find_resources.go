@@ -22,10 +22,12 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 		lbSlice, _ := services.FindLoadBalancer(cfg, region, resourceName)
 		for _, lb := range lbSlice {
 			results = append(results, LoadBalancerSearchResult{
-				SearchResult: SearchResult{
-					Account: associatedAwsAccount,
-					Profile: profile,
-					Region:  region,
+				SearchResultNonGlobal: SearchResultNonGlobal{
+					SearchResult: SearchResult{
+						Account: associatedAwsAccount,
+						Profile: profile,
+					},
+					Region: region,
 				},
 				LoadBalancerName:    lb[0],
 				LoadBalancerDnsName: lb[1],
@@ -41,10 +43,12 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 		}
 		for _, instance := range instances {
 			ec2SearchResult := Ec2SearchResult{
-				SearchResult: SearchResult{
-					Account: associatedAwsAccount,
-					Profile: profile,
-					Region:  region,
+				SearchResultNonGlobal: SearchResultNonGlobal{
+					SearchResult: SearchResult{
+						Account: associatedAwsAccount,
+						Profile: profile,
+					},
+					Region: region,
 				},
 				InstanceId: *instance.InstanceId,
 			}
@@ -156,10 +160,12 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 
 		for _, address := range addresses {
 			elasticIpSearchResult := ElasticIpSearchResult{
-				SearchResult: SearchResult{
-					Account: associatedAwsAccount,
-					Profile: profile,
-					Region:  region,
+				SearchResultNonGlobal: SearchResultNonGlobal{
+					SearchResult: SearchResult{
+						Account: associatedAwsAccount,
+						Profile: profile,
+					},
+					Region: region,
 				},
 				PublicIp: *address.PublicIp,
 			}

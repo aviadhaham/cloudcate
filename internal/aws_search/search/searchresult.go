@@ -3,11 +3,15 @@ package aws_search
 type SearchResult struct {
 	Account string `json:"account"`
 	Profile string `json:"profile"`
-	Region  string `json:"region"`
+}
+
+type SearchResultNonGlobal struct {
+	SearchResult
+	Region string `json:"region"`
 }
 
 type Ec2SearchResult struct {
-	SearchResult
+	SearchResultNonGlobal
 	InstanceId       string `json:"instance_id"`
 	InstanceName     string `json:"instance_name"`
 	PrivateIpAddress string `json:"private_ip_address"`
@@ -17,7 +21,7 @@ type Ec2SearchResult struct {
 }
 
 type LoadBalancerSearchResult struct {
-	SearchResult
+	SearchResultNonGlobal
 	LoadBalancerName    string `json:"load_balancer_name"`
 	LoadBalancerDnsName string `json:"load_balancer_dns_name"`
 }
@@ -45,7 +49,7 @@ type IamUserKeySearchResult struct {
 }
 
 type ElasticIpSearchResult struct {
-	SearchResult
+	SearchResultNonGlobal
 	PublicIp   string `json:"public_ip"`
 	InstanceId string `json:"instance_id"`
 }
