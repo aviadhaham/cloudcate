@@ -22,8 +22,9 @@ func NewRouter(profiles []string) *gin.Engine {
 		api.GET("/search", func(c *gin.Context) {
 			resourceName := c.Query("resource_name")
 			resourceType := c.Query("resource_type")
+			resourceSubType := c.Query("resource_subtype")
 
-			results, err := search.FindResources(profiles, config.ServicesGlobality, resourceType, resourceName)
+			results, err := search.FindResources(profiles, config.ServicesGlobality, resourceType, resourceSubType, resourceName)
 			if err != nil {
 				log.Fatalf("Failed to search resources: %v", err)
 			}

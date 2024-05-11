@@ -34,9 +34,14 @@ type DNSSearchResult struct {
 	DnsRecordType  string `json:"dns_record_type"`
 }
 
-type IamSearchResult struct {
+type IamUserSearchResult struct {
 	SearchResult
 	UserName string `json:"user_name"`
+}
+
+type IamUserKeySearchResult struct {
+	IamUserSearchResult
+	AccessKey string `json:"access_key"`
 }
 
 type ElasticIpSearchResult struct {

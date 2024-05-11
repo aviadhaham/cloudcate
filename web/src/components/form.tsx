@@ -31,6 +31,7 @@ export default function Form(props: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeValue, setTypeValue] = useState("");
+  const [subTypeValue, setSubTypeValue] = useState("");
 
   const handleSearchTermChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -39,7 +40,11 @@ export default function Form(props: Props) {
   };
 
   const handleTypeValueChange = (value: string) => {
-    setTypeValue(value);
+    const types = value.split(":");
+    const type = types[0];
+    const subType = types[1] || "";
+    setTypeValue(type);
+    setSubTypeValue(subType);
   };
 
   const sendSearchRequest = async () => {
@@ -47,9 +52,13 @@ export default function Form(props: Props) {
     props.onResults([]);
     setIsLoading(true);
 
-    const response = await fetch(
-      `/api/search?resource_name=${searchTerm}&resource_type=${typeValue}`
-    );
+    let url = `/api/search?resource_name=${searchTerm}&resource_type=${typeValue}`;
+
+    if (subTypeValue !== "") {
+      url += `&resource_subtype=${subTypeValue}`
+    }
+
+    const response = await fetch(url);
 
     if (!response.ok) {
       console.error(
@@ -117,7 +126,8 @@ export default function Form(props: Props) {
                   <SelectItem value="ec2">
                     EC2 Instance (by IP, DNS, or Tags)
                   </SelectItem>
-                  <SelectItem value="iam">IAM (Access Key)</SelectItem>
+                  <SelectItem value="iam:key">IAM (Access Key)</SelectItem>
+                  <SelectItem value="iam:user">IAM (User)</SelectItem>
                   <SelectItem value="elastic_ip">Elastic IP</SelectItem>
                   <SelectItem value="cloudfront">
                     CloudFront Distribution (by ID or Domain name)
