@@ -3,6 +3,7 @@ package aws_search
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -27,7 +28,7 @@ func FindIam(config aws.Config, region string, searchValue string) (string, stri
 			return "", "", fmt.Errorf("failed to list access keys for user %s: %v", *user.UserName, err)
 		}
 		for _, accessKeyMetadata := range accessKeys.AccessKeyMetadata {
-			if *accessKeyMetadata.AccessKeyId == accessKey {
+			if strings.Contains(*accessKeyMetadata.AccessKeyId, accessKey) {
 				return accessKey, *user.UserName, nil
 			}
 		}
