@@ -106,19 +106,48 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 			}
 		}
 	case "iam":
-		user, err := services.FindIam(cfg, region, resourceName, resourceSubType)
-		if err != nil {
-			log.Printf("profile '%s': %v\n", profile, err)
+		if resourceSubType == "user" {
+			users, err := services.FindIamUser(cfg, region, resourceName)
+			if err != nil {
+				log.Printf("profile '%s': %v\n", profile, err)
+			}
+			if users == nil {
+				return nil, fmt.Errorf("no IAM users found")
+			}
+			for _, user := range users {
+				if user != "" {
+					results = append(results, IamUserSearchResult{
+						SearchResult: SearchResult{
+							Account: associatedAwsAccount,
+							Profile: profile,
+						},
+						UserName: user,
+					})
+				}
+			}
 		}
-		if user != "" {
-			results = append(results, IamSearchResult{
-				SearchResult: SearchResult{
-					Account: associatedAwsAccount,
-					Profile: profile,
-				},
-				UserName: user,
-			})
+		if resourceSubType == "key" {
+			accessKeys, err := services.FindIamUserKey(cfg, region, resourceName)
+			if err != nil {
+				log.Printf("profile '%s': %v\n", profile, err)
+			}
+			if accessKeys == nil {
+				return nil, fmt.Errorf("no IAM user access keys users found")
+			}
+			for user, key := range accessKeys {
+				results = append(results, IamUserKeySearchResult{
+					IamUserSearchResult: IamUserSearchResult{
+						SearchResult: SearchResult{
+							Account: associatedAwsAccount,
+							Profile: profile,
+						},
+						UserName: user,
+					},
+					AccessKey: key,
+				})
+			}
 		}
+
 	case "elastic_ip":
 		addresses, err := services.FindElasticIp(cfg, region, resourceName)
 		if err != nil {
