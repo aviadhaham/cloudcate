@@ -13,7 +13,7 @@ import (
 	aws_config "github.com/aws/aws-sdk-go-v2/config"
 )
 
-func findResourcesInRegion(profile string, cfg aws.Config, region string, resourceType string, resourceName string) ([]interface{}, error) {
+func findResourcesInRegion(profile string, cfg aws.Config, region string, resourceSubType string, resourceType string, resourceName string) ([]interface{}, error) {
 	associatedAwsAccount := GetAwsAccount(cfg, region)
 	var results []interface{}
 
@@ -106,11 +106,11 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 			}
 		}
 	case "iam":
-		accessKey, user, err := services.FindIam(cfg, region, resourceName)
+		user, err := services.FindIam(cfg, region, resourceName, resourceSubType)
 		if err != nil {
 			log.Printf("profile '%s': %v\n", profile, err)
 		}
-		if accessKey != "" && user != "" {
+		if user != "" {
 			results = append(results, IamSearchResult{
 				SearchResult: SearchResult{
 					Account: associatedAwsAccount,
@@ -161,11 +161,10 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 			results = append(results, cloudFrontSearchResult)
 		}
 	}
-
 	return results, nil
 }
 
-func FindResources(profiles []string, servicesGlobality map[string]bool, resourceType string, resourceName string) ([]interface{}, error) {
+func FindResources(profiles []string, servicesGlobality map[string]bool, resourceType string, resourceSubType string, resourceName string) ([]interface{}, error) {
 	var results []interface{}
 	var wg sync.WaitGroup
 	resultChan := make(chan []interface{})
@@ -185,7 +184,7 @@ func FindResources(profiles []string, servicesGlobality map[string]bool, resourc
 			wg.Add(1)
 			go func(profile string, cfg aws.Config, region string) {
 				defer wg.Done()
-				res, err := findResourcesInRegion(profile, cfg, region, resourceType, resourceName)
+				res, err := findResourcesInRegion(profile, cfg, region, resourceSubType, resourceType, resourceName)
 				if err != nil {
 					log.Printf("profile '%s', error searching for resources in region %s: %v", profile, region, err)
 					return
@@ -199,7 +198,7 @@ func FindResources(profiles []string, servicesGlobality map[string]bool, resourc
 			wg.Add(1)
 			go func(profile string, cfg aws.Config, region string) {
 				defer wg.Done()
-				res, err := findResourcesInRegion(profile, cfg, region, resourceType, resourceName)
+				res, err := findResourcesInRegion(profile, cfg, region, resourceSubType, resourceType, resourceName)
 				if err != nil {
 					log.Printf("profile '%s', error searching for resources in region %s: %v", profile, region, err)
 					return
