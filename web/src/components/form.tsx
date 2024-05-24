@@ -11,16 +11,18 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { AllSearchResults } from "@/types/search-results";
 import { LoaderCircle } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 
 type Props = {
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
   onResults: (data: AllSearchResults[]) => void;
 };
 
-function isSearchTermValid(searchTerm: string) {
-  if (searchTerm === "") {
+function isSearchQueryValid(query: string) {
+  if (query === "") {
     return false;
-  } else if (searchTerm.trim() === "") {
+  } else if (query.trim() === "") {
     return false;
   } else {
     return true;
@@ -29,15 +31,8 @@ function isSearchTermValid(searchTerm: string) {
 
 export default function Form(props: Props) {
   const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [typeValue, setTypeValue] = useState("");
   const [subTypeValue, setSubTypeValue] = useState("");
-
-  const handleSearchTermChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setSearchTerm(event.target.value);
-  };
 
   const handleTypeValueChange = (value: string) => {
     const types = value.split(":");
@@ -52,7 +47,7 @@ export default function Form(props: Props) {
     props.onResults([]);
     setIsLoading(true);
 
-    let url = `/api/search?resource_name=${searchTerm}&resource_type=${typeValue}`;
+    let url = `/api/search?resource_name=${props.searchQuery}&resource_type=${typeValue}`;
 
     if (subTypeValue !== "") {
       url += `&resource_subtype=${subTypeValue}`
@@ -97,8 +92,8 @@ export default function Form(props: Props) {
           <div>
             <Input
               type="text"
-              value={searchTerm}
-              onChange={handleSearchTermChange}
+              value={props.searchQuery}
+              onChange={(e) => props.setSearchQuery(e.target.value)}
               name="resource-name"
               id="resource-name"
             />
@@ -138,7 +133,7 @@ export default function Form(props: Props) {
           </div>
         </div>
         <Button onClick={
-            isSearchTermValid(searchTerm) == true
+            isSearchQueryValid(props.searchQuery) == true
               ? sendSearchRequest
               : undefined
           }
