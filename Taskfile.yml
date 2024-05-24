@@ -1,6 +1,9 @@
 version: "3"
 
 tasks:
+  default:
+    deps: [ui:dev, server:dev]
+
   ui:dev:
     desc: Start the UI
     dir: web
