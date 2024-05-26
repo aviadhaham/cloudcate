@@ -39,7 +39,7 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 			return nil, fmt.Errorf("error finding EC2 instances: %v", err)
 		}
 		if len(instances) == 0 {
-			return nil, fmt.Errorf("no EC2 instances found")
+			return nil, nil
 		}
 		for _, instance := range instances {
 			ec2SearchResult := Ec2SearchResult{
