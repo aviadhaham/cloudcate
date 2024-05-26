@@ -32,7 +32,8 @@ func FindEc2(config aws.Config, region string, searchValue string) ([]types.Inst
 				if instance.PrivateDnsName != nil && strings.Contains(strings.ToLower(*instance.PrivateDnsName), searchValue) ||
 					instance.PrivateIpAddress != nil && strings.Contains(*instance.PrivateIpAddress, searchValue) ||
 					instance.PublicDnsName != nil && strings.Contains(strings.ToLower(*instance.PublicDnsName), searchValue) ||
-					instance.PublicIpAddress != nil && strings.Contains(*instance.PublicIpAddress, searchValue) {
+					instance.PublicIpAddress != nil && strings.Contains(*instance.PublicIpAddress, searchValue) ||
+					instance.InstanceId != nil && strings.Contains(strings.ToLower(*instance.InstanceId), searchValue) {
 					filteredInstances = append(filteredInstances, instance)
 				}
 				for _, tag := range instance.Tags {

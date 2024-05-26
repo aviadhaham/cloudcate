@@ -119,7 +119,7 @@ export default function Form(props: Props) {
                   </SelectItem>
                   <SelectItem value="loadbalancer">Load Balancer</SelectItem>
                   <SelectItem value="ec2">
-                    EC2 Instance (by IP, DNS, or Tags)
+                    EC2 Instance (by ID, IP, DNS, or Tags)
                   </SelectItem>
                   <SelectItem value="iam:key">IAM (Access Key)</SelectItem>
                   <SelectItem value="iam:user">IAM (User)</SelectItem>
