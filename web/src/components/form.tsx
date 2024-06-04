@@ -16,6 +16,10 @@ import { useState } from "react";
 type Props = {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
+  typeQuery: string;
+  setTypeQuery: (value: string) => void;
+  subTypeQuery: string;
+  setSubTypeQuery: (value: string) => void;
   onResults: (data: AllSearchResults[]) => void;
 };
 
@@ -31,15 +35,13 @@ function isSearchQueryValid(query: string) {
 
 export default function Form(props: Props) {
   const [isLoading, setIsLoading] = useState(false);
-  const [typeValue, setTypeValue] = useState("");
-  const [subTypeValue, setSubTypeValue] = useState("");
 
   const handleTypeValueChange = (value: string) => {
     const types = value.split(":");
     const type = types[0];
     const subType = types[1] || "";
-    setTypeValue(type);
-    setSubTypeValue(subType);
+    props.setTypeQuery(type);
+    props.setSubTypeQuery(subType);
   };
 
   const sendSearchRequest = async () => {
@@ -47,10 +49,10 @@ export default function Form(props: Props) {
     props.onResults([]);
     setIsLoading(true);
 
-    let url = `/api/search?resource_name=${props.searchQuery}&resource_type=${typeValue}`;
+    let url = `/api/search?resource_name=${props.searchQuery}&resource_type=${props.typeQuery}`;
 
-    if (subTypeValue !== "") {
-      url += `&resource_subtype=${subTypeValue}`
+    if (props.subTypeQuery !== "") {
+      url += `&resource_subtype=${props.subTypeQuery}`;
     }
 
     const response = await fetch(url);
@@ -83,10 +85,7 @@ export default function Form(props: Props) {
     <>
       <div className="flex items-center justify-center my-10 gap-x-6">
         <div className="w-[300px]">
-          <label
-            htmlFor="resource-name"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
+          <label htmlFor="resource-name" className="block text-sm font-medium leading-6 text-gray-900">
             Resource Name (may be partial)
           </label>
           <div>
@@ -100,43 +99,34 @@ export default function Form(props: Props) {
           </div>
         </div>
         <div>
-          <label
-            htmlFor="resource-type"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
+          <label htmlFor="resource-type" className="block text-sm font-medium leading-6 text-gray-900">
             Resource Type
           </label>
           <div>
-            <Select onValueChange={handleTypeValueChange}>
+            <Select
+              value={`${props.typeQuery}${props.subTypeQuery ? `:${props.subTypeQuery}` : ""}`}
+              onValueChange={handleTypeValueChange}
+            >
               <SelectTrigger className="w-[360px]">
                 <SelectValue placeholder="Select a type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="s3">S3 Bucket</SelectItem>
-                  <SelectItem value="dns">
-                    DNS (Hosted Zone or Record)
-                  </SelectItem>
+                  <SelectItem value="dns">DNS (Hosted Zone or Record)</SelectItem>
                   <SelectItem value="loadbalancer">Load Balancer</SelectItem>
-                  <SelectItem value="ec2">
-                    EC2 Instance (by ID, IP, DNS, or Tags)
-                  </SelectItem>
+                  <SelectItem value="ec2">EC2 Instance (by ID, IP, DNS, or Tags)</SelectItem>
                   <SelectItem value="iam:key">IAM (Access Key)</SelectItem>
                   <SelectItem value="iam:user">IAM (User)</SelectItem>
                   <SelectItem value="elastic_ip">Elastic IP</SelectItem>
-                  <SelectItem value="cloudfront">
-                    CloudFront Distribution (by ID or Domain name)
-                  </SelectItem>
+                  <SelectItem value="cloudfront">CloudFront Distribution (by ID or Domain name)</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
         </div>
-        <Button onClick={
-            isSearchQueryValid(props.searchQuery) == true
-              ? sendSearchRequest
-              : undefined
-          }
+        <Button
+          onClick={isSearchQueryValid(props.searchQuery) == true ? sendSearchRequest : undefined}
           className="self-end"
         >
           Search AWS

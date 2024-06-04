@@ -8,14 +8,16 @@ import { useSearchParams } from "react-router-dom";
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [typeQuery, setTypeQuery] = useState(searchParams.get("t") || "");
+  const [subTypeQuery, setSubTypeQuery] = useState(searchParams.get("st") || "");
   const [results, setResults] = useState<AllSearchResults[]>([]);
   const handleResults = (data: AllSearchResults[]) => {
     setResults(data);
   };
 
   useEffect(() => {
-    setSearchParams({ q: searchQuery });
-  }, [setSearchParams, searchQuery]);
+    setSearchParams({ q: searchQuery, t: typeQuery, st: subTypeQuery });
+  }, [setSearchParams, searchQuery, typeQuery, subTypeQuery]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -24,6 +26,10 @@ export default function HomePage() {
         <Form
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          typeQuery={typeQuery}
+          setTypeQuery={setTypeQuery}
+          subTypeQuery={subTypeQuery}
+          setSubTypeQuery={setSubTypeQuery}
           onResults={handleResults}
         />
         {results && results.length !== 0 && (
