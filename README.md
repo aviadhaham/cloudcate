@@ -2,7 +2,7 @@
 
 # CloudCate
 
-Welcome to CloudCate! 🚀 This handy tool tackles the headache of searching for AWS resources across multiple accounts. Ever found yourself juggling between AWS accounts to track down resources? CloudCate is here to make your life easier by consolidating searches for various AWS resources into one simple, user-friendly interface.
+Welcome to CloudCate! This handy tool tackles the headache of searching for AWS resources across multiple accounts. Ever found yourself juggling between AWS accounts to track down resources? CloudCate makes your life easier by consolidating searches for various AWS resources into one simple, user-friendly interface.
 
 ## What You Can Search
 
