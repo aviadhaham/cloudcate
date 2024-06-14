@@ -1,4 +1,4 @@
-module github.com/aviadhaham/cloudcate-service
+module github.com/aviadhaham/cloudcate
 
 go 1.20
 

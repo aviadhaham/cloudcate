@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	config "github.com/aviadhaham/cloudcate-service/internal/aws_search/config"
+	config "github.com/aviadhaham/cloudcate/internal/aws_search/config"
 	aws_config "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"

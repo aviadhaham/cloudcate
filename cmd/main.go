@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	aws_search "github.com/aviadhaham/cloudcate-service/internal/aws_search/search"
-	"github.com/aviadhaham/cloudcate-service/internal/web"
+	aws_search "github.com/aviadhaham/cloudcate/internal/aws_search/search"
+	"github.com/aviadhaham/cloudcate/internal/web"
 )
 
 func main() {
