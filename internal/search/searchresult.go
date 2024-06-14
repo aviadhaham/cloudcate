@@ -1,4 +1,4 @@
-package aws_search
+package search
 
 type SearchResult struct {
 	Account string `json:"account"`

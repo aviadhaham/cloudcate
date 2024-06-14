@@ -1,4 +1,4 @@
-package aws_search
+package search
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"log"
 	"sync"
 
-	config "github.com/aviadhaham/cloudcate/internal/aws_search/config"
-	services "github.com/aviadhaham/cloudcate/internal/aws_search/search/services"
+	"github.com/aviadhaham/cloudcate/internal/config"
+	"github.com/aviadhaham/cloudcate/internal/services"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	aws_config "github.com/aws/aws-sdk-go-v2/config"

@@ -1,4 +1,4 @@
-package aws_search
+package services
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
+	"github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 )
@@ -18,7 +18,7 @@ func FindLoadBalancer(config aws.Config, region string, searchValue string) ([][
 	elbv2Client := elasticloadbalancingv2.NewFromConfig(config)
 	v2_output, err := elbv2Client.DescribeLoadBalancers(context.TODO(), &elasticloadbalancingv2.DescribeLoadBalancersInput{})
 	if err != nil {
-		var accessDeniedErr *awshttp.ResponseError
+		var accessDeniedErr *http.ResponseError
 		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
 			return nil, nil
 		}
@@ -28,7 +28,7 @@ func FindLoadBalancer(config aws.Config, region string, searchValue string) ([][
 	elbv1Client := elasticloadbalancing.NewFromConfig(config)
 	v1_output, err := elbv1Client.DescribeLoadBalancers(context.TODO(), &elasticloadbalancing.DescribeLoadBalancersInput{})
 	if err != nil {
-		var accessDeniedErr *awshttp.ResponseError
+		var accessDeniedErr *http.ResponseError
 		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
 			return nil, nil
 		}

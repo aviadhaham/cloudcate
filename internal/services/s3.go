@@ -1,4 +1,4 @@
-package aws_search
+package services
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
+	"github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
@@ -17,7 +17,7 @@ func FindS3Bucket(config aws.Config, region string, searchValue string) []string
 	s3Client := s3.NewFromConfig(config)
 	output, err := s3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
 	if err != nil {
-		var accessDeniedErr *awshttp.ResponseError
+		var accessDeniedErr *http.ResponseError
 		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
 			return nil
 		}

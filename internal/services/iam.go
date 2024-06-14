@@ -1,4 +1,4 @@
-package aws_search
+package services
 
 import (
 	"context"

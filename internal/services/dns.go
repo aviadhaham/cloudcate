@@ -1,4 +1,4 @@
-package aws_search
+package services
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
+	"github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/route53/types"
 )
@@ -19,7 +19,7 @@ func FindDns(config aws.Config, region string, searchValue string) map[string][]
 	route53Client := route53.NewFromConfig(config)
 	hostedZones, err := route53Client.ListHostedZones(context.TODO(), &route53.ListHostedZonesInput{})
 	if err != nil {
-		var accessDeniedErr *awshttp.ResponseError
+		var accessDeniedErr *http.ResponseError
 		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
 			return nil
 		}

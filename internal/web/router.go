@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	config "github.com/aviadhaham/cloudcate/internal/aws_search/config"
-	search "github.com/aviadhaham/cloudcate/internal/aws_search/search"
+	"github.com/aviadhaham/cloudcate/internal/config"
+	"github.com/aviadhaham/cloudcate/internal/search"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"

@@ -1,4 +1,4 @@
-package aws_search
+package search
 
 import (
 	"bufio"
@@ -8,10 +8,10 @@ import (
 	"os"
 	"strings"
 
-	config "github.com/aviadhaham/cloudcate/internal/aws_search/config"
+	"github.com/aviadhaham/cloudcate/internal/config"
 	aws_config "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
 )
 
@@ -48,7 +48,7 @@ func GetRegions(profile string) ([]string, error) {
 	client := ec2.NewFromConfig(cfg)
 
 	input := &ec2.DescribeRegionsInput{
-		Filters: []ec2types.Filter{
+		Filters: []types.Filter{
 			{
 				Name:   aws.String("opt-in-status"),
 				Values: []string{"opt-in-not-required", "opted-in"},

@@ -1,4 +1,4 @@
-package aws_search
+package config
 
 var AwsFullRegionsList = []string{
 	"af-south-1",     // Africa (Cape Town)

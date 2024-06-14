@@ -1,4 +1,4 @@
-package aws_search
+package config
 
 var ServicesGlobality = map[string]bool{
 	"loadbalancer": false,

@@ -1,4 +1,4 @@
-package aws_search
+package services
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
+	"github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront/types"
 )
@@ -18,7 +18,7 @@ func FindCloudfront(config aws.Config, region string, searchValue string) ([]typ
 	cfClient := cloudfront.NewFromConfig(config)
 	output, err := cfClient.ListDistributions(context.TODO(), &cloudfront.ListDistributionsInput{})
 	if err != nil {
-		var accessDeniedErr *awshttp.ResponseError
+		var accessDeniedErr *http.ResponseError
 		if errors.As(err, &accessDeniedErr) && accessDeniedErr.HTTPStatusCode() == 403 {
 			return nil, err
 		}

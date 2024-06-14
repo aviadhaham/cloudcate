@@ -4,12 +4,12 @@ import (
 	"log"
 	"os"
 
-	aws_search "github.com/aviadhaham/cloudcate/internal/aws_search/search"
+	"github.com/aviadhaham/cloudcate/internal/search"
 	"github.com/aviadhaham/cloudcate/internal/web"
 )
 
 func main() {
-	profiles, err := aws_search.GetProfiles()
+	profiles, err := search.GetProfiles()
 	if err != nil {
 		log.Fatalf("Failed to get profiles: %v", err)
 	}
