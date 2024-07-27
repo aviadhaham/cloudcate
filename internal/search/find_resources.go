@@ -18,6 +18,35 @@ func findResourcesInRegion(profile string, cfg aws.Config, region string, resour
 	var results []interface{}
 
 	switch resourceType {
+	case "vpc":
+		vpcList, err := services.FindVpc(cfg, region, resourceName)
+		if err != nil {
+			return nil, fmt.Errorf("error finding VPCs: %v", err)
+		}
+		for _, vpc := range vpcList {
+			vpcSearchResult := VpcSearchResult{
+				SearchResultNonGlobal: SearchResultNonGlobal{
+					SearchResult: SearchResult{
+						Account: associatedAwsAccount,
+						Profile: profile,
+					},
+					Region: region,
+				},
+				VpcId:     *vpc.VpcId,
+				CidrBlock: *vpc.CidrBlock,
+			}
+
+			if vpc.Tags != nil {
+				for _, tag := range vpc.Tags {
+					if *tag.Key == "Name" {
+						vpcSearchResult.VpcName = *tag.Value
+						break
+					}
+				}
+			}
+
+			results = append(results, vpcSearchResult)
+		}
 	case "loadbalancer":
 		lbSlice, _ := services.FindLoadBalancer(cfg, region, resourceName)
 		for _, lb := range lbSlice {

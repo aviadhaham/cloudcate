@@ -1,13 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { AllSearchResults } from "@/types/search-results";
 import { LoaderCircle } from "lucide-react";
@@ -58,9 +51,7 @@ export default function Form(props: Props) {
     const response = await fetch(url);
 
     if (!response.ok) {
-      console.error(
-        `Error fetching data: ${response.status} ${response.statusText}`
-      );
+      console.error(`Error fetching data: ${response.status} ${response.statusText}`);
       setIsLoading(false);
       return;
     }
@@ -112,6 +103,7 @@ export default function Form(props: Props) {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
+                  <SelectItem value="vpc">VPC (by ID, CIDR, or Tags)</SelectItem>
                   <SelectItem value="s3">S3 Bucket</SelectItem>
                   <SelectItem value="dns">DNS (Hosted Zone or Record)</SelectItem>
                   <SelectItem value="loadbalancer">Load Balancer</SelectItem>

@@ -10,6 +10,13 @@ type SearchResultNonGlobal struct {
 	Region string `json:"region"`
 }
 
+type VpcSearchResult struct {
+	SearchResultNonGlobal
+	VpcName   string `json:"vpc_name"`
+	VpcId     string `json:"vpc_id"`
+	CidrBlock string `json:"cidr_block"`
+}
+
 type Ec2SearchResult struct {
 	SearchResultNonGlobal
 	InstanceId       string `json:"instance_id"`
