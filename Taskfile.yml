@@ -12,10 +12,9 @@ tasks:
       - pnpm dev
   server:dev:
     desc: Start the backend server
-    env:
-      PORT: 80
+    dotenv: [".env.dev"]
     cmds:
-      - go run cmd/main.go
+      - go run cmd/server/main.go
 
   ui:build:
     desc: Build UI for production
@@ -25,7 +24,7 @@ tasks:
   server:build:
     desc: Build server for production
     cmds:
-      - go build -o server cmd/main.go
+      - go build -o server cmd/server/main.go
   server:
     desc: Start the production server
     deps: [ui:build, server:build]

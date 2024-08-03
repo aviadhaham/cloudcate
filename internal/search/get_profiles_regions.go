@@ -16,10 +16,17 @@ import (
 )
 
 func GetProfiles() ([]string, error) {
-	// read .aws/credetials file
-	f, err := os.Open(fmt.Sprintf("%s/.aws/credentials", os.Getenv("HOME")))
+	credentialsPath, ok := os.LookupEnv("AWS_SHARED_CREDENTIALS_FILE")
+	if !ok {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatalf("unable to find home directory: %v", err)
+		}
+		credentialsPath = fmt.Sprintf("%s/.aws/credentials", homeDir)
+	}
+	f, err := os.Open(credentialsPath)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	defer f.Close()
 
@@ -42,7 +49,7 @@ func GetRegions(profile string) ([]string, error) {
 	// hardcoded region to us-east-1, because there's no chance it's not going to be active
 	cfg, err := aws_config.LoadDefaultConfig(context.TODO(), aws_config.WithSharedConfigProfile(profile))
 	if err != nil {
-		log.Fatalf("failed to load configuration for profile, %v", err)
+		return nil, fmt.Errorf("failed to load configuration for profile, %v", err)
 	}
 	cfg.Region = "us-east-1"
 	client := ec2.NewFromConfig(cfg)
